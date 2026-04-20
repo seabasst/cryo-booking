@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { constructWebhookEvent } from "@/lib/stripe";
 import { createBooking } from "@/lib/bokadirekt";
+import {
+  sendCustomerConfirmation,
+  sendBusinessNotification,
+} from "@/lib/email";
 import Stripe from "stripe";
 
 // Disable body parsing for webhook route
@@ -42,29 +46,39 @@ export async function POST(request: NextRequest) {
       const metadata = session.metadata;
 
       if (metadata) {
-        try {
-          // Create booking in Bokadirekt (mock for now)
-          const booking = await createBooking({
-            slotId: metadata.slotId,
-            date: metadata.date,
-            time: metadata.time,
-            customerName: metadata.customerName,
-            customerEmail: metadata.customerEmail,
-            customerPhone: metadata.customerPhone,
-            serviceId: metadata.serviceId,
-            serviceName: metadata.serviceName,
-            duration: parseInt(metadata.duration, 10),
-            price: parseInt(metadata.price, 10),
-          });
+        const bookingData = {
+          slotId: metadata.slotId,
+          date: metadata.date,
+          time: metadata.time,
+          customerName: metadata.customerName,
+          customerEmail: metadata.customerEmail,
+          customerPhone: metadata.customerPhone,
+          serviceId: metadata.serviceId,
+          serviceName: metadata.serviceName,
+          duration: parseInt(metadata.duration, 10),
+          price: parseInt(metadata.price, 10),
+        };
 
+        try {
+          const booking = await createBooking(bookingData);
           console.log("✅ Booking created:", booking.bookingId);
-          console.log("📧 Confirmation should be sent to:", metadata.customerEmail);
-          console.log("📋 Service:", metadata.serviceName, "-", metadata.duration, "min");
         } catch (bookingError) {
           console.error("Error creating booking:", bookingError);
-          // Don't return error - payment was successful
-          // Log for manual follow-up if needed
         }
+
+        const emailResults = await Promise.allSettled([
+          sendCustomerConfirmation(bookingData),
+          sendBusinessNotification(bookingData),
+        ]);
+
+        emailResults.forEach((result, i) => {
+          const label = i === 0 ? "customer" : "business";
+          if (result.status === "fulfilled") {
+            console.log(`📧 Sent ${label} email`);
+          } else {
+            console.error(`Failed to send ${label} email:`, result.reason);
+          }
+        });
       } else {
         console.warn("No metadata found in checkout session");
       }
