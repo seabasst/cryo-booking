@@ -85,11 +85,11 @@ export async function POST(request: NextRequest) {
       customerPhone: body.customerPhone,
     });
 
-    if (!session.url) {
-      throw new Error("Failed to create checkout session URL");
+    if (!session.client_secret) {
+      throw new Error("Failed to create checkout session client_secret");
     }
 
-    return NextResponse.json({ url: session.url });
+    return NextResponse.json({ clientSecret: session.client_secret });
   } catch (error) {
     console.error("Error creating checkout session:", error);
     return NextResponse.json(

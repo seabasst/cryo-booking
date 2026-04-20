@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { CustomerInfo, TimeSlot, Service } from "@/lib/types";
+import EmbeddedCheckoutModal from "./EmbeddedCheckoutModal";
 
 interface OrderSummaryProps {
   selectedService: Service;
@@ -20,6 +21,7 @@ export default function OrderSummary({
 }: OrderSummaryProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -61,8 +63,19 @@ export default function OrderSummary({
         throw new Error(data.error || "Något gick fel");
       }
 
-      // Redirect to Stripe Checkout
-      window.location.href = data.url;
+      if (data.clientSecret) {
+        setClientSecret(data.clientSecret);
+        setIsLoading(false);
+        return;
+      }
+
+      // Demo mode fallback
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+
+      throw new Error("Ogiltigt svar från servern");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Något gick fel");
       setIsLoading(false);
@@ -70,6 +83,13 @@ export default function OrderSummary({
   };
 
   return (
+    <>
+    {clientSecret && (
+      <EmbeddedCheckoutModal
+        clientSecret={clientSecret}
+        onClose={() => setClientSecret(null)}
+      />
+    )}
     <div className="animate-slide-up">
       <h3 className="text-lg font-semibold text-fsa-text mb-4">
         Bekräfta din bokning
@@ -209,5 +229,6 @@ export default function OrderSummary({
         </button>
       </div>
     </div>
+    </>
   );
 }

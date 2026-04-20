@@ -29,6 +29,7 @@ export async function createCheckoutSession(
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   const session = await stripe.checkout.sessions.create({
+    ui_mode: "embedded",
     payment_method_types: ["card"],
     mode: "payment",
     customer_email: bookingData.customerEmail,
@@ -57,8 +58,7 @@ export async function createCheckoutSession(
         quantity: 1,
       },
     ],
-    success_url: `${appUrl}/tack?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${appUrl}/?cancelled=true`,
+    return_url: `${appUrl}/tack?session_id={CHECKOUT_SESSION_ID}`,
   });
 
   return session;
