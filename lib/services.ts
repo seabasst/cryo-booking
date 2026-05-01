@@ -15,7 +15,7 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
         name: "Kryoterapi",
         duration: 10,
         price: 150,
-        description: "Helkroppsbehandling i -110°C",
+        description: "Helkroppsbehandling i -87°C",
         popular: true,
       },
       {
@@ -48,10 +48,11 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
       },
       {
         id: "recovery-ultimate",
-        name: "Recovery Ultimate",
+        name: "Compression Therapy",
         duration: 20,
         price: 200,
-        description: "Återhämtningsbyxor",
+        description:
+          "Kompressionsbyxor – boostar återhämtningen, blodcirkulationen och tar bort slaggprodukter",
       },
     ],
   },
@@ -65,6 +66,8 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
         name: "Deep Tissue 25 min",
         duration: 25,
         price: 500,
+        description:
+          "Djupgående anti-inflammatorisk massage – utökar rörligheten och tar bort spänningar",
         popular: true,
       },
       {
@@ -72,12 +75,16 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
         name: "Deep Tissue 45 min",
         duration: 45,
         price: 900,
+        description:
+          "Djupgående anti-inflammatorisk massage – utökar rörligheten och tar bort spänningar",
       },
       {
         id: "deep-tissue-60",
         name: "Deep Tissue 60 min",
         duration: 60,
         price: 1100,
+        description:
+          "Djupgående anti-inflammatorisk massage – utökar rörligheten och tar bort spänningar",
         popular: true,
       },
       {
@@ -85,72 +92,91 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
         name: "Deep Tissue 75 min",
         duration: 75,
         price: 1350,
+        description:
+          "Djupgående anti-inflammatorisk massage – utökar rörligheten och tar bort spänningar",
       },
       {
         id: "deep-tissue-90",
         name: "Deep Tissue 90 min",
         duration: 90,
         price: 1600,
+        description:
+          "Djupgående anti-inflammatorisk massage – utökar rörligheten och tar bort spänningar",
       },
       {
         id: "sportmassage-25",
         name: "Sportmassage 25 min",
         duration: 25,
         price: 500,
+        description:
+          "Funktionell massage för att utöka performance – inkl. koppning",
       },
       {
         id: "sportmassage-45",
         name: "Sportmassage 45 min",
         duration: 45,
         price: 900,
+        description:
+          "Funktionell massage för att utöka performance – inkl. koppning",
       },
       {
         id: "sportmassage-60",
         name: "Sportmassage 60 min",
         duration: 60,
         price: 1100,
+        description:
+          "Funktionell massage för att utöka performance – inkl. koppning",
       },
       {
         id: "sportmassage-75",
         name: "Sportmassage 75 min",
         duration: 75,
         price: 1350,
+        description:
+          "Funktionell massage för att utöka performance – inkl. koppning",
       },
       {
         id: "sportmassage-90",
         name: "Sportmassage 90 min",
         duration: 90,
         price: 1500,
+        description:
+          "Funktionell massage för att utöka performance – inkl. koppning",
       },
       {
         id: "svensk-klassisk-25",
         name: "Svensk Klassisk 25 min",
         duration: 25,
         price: 500,
+        description: "Klassiska massagegrepp – tar bort spänningar",
       },
       {
         id: "svensk-klassisk-45",
         name: "Svensk Klassisk 45 min",
         duration: 45,
         price: 900,
+        description: "Klassiska massagegrepp – tar bort spänningar",
       },
       {
         id: "svensk-klassisk-60",
         name: "Svensk Klassisk 60 min",
         duration: 60,
         price: 1100,
+        description: "Klassiska massagegrepp – tar bort spänningar",
       },
       {
         id: "svensk-klassisk-75",
         name: "Svensk Klassisk 75 min",
         duration: 75,
         price: 1350,
+        description: "Klassiska massagegrepp – tar bort spänningar",
       },
       {
         id: "svensk-klassisk-90",
         name: "Svensk Klassisk 90 min",
         duration: 90,
         price: 1500,
+        description: "Klassiska massagegrepp – tar bort spänningar",
       },
       {
         id: "muskelkonsultation",

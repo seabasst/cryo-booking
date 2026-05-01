@@ -9,16 +9,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // FSA Workouts theme - Dark athletic style
+        // FSA Workouts theme - Dark gray + black + green
         fsa: {
           black: "#0a0a0a",
           darker: "#050505",
           dark: "#111111",
           gray: "#1a1a1a",
           "gray-light": "#2a2a2a",
-          red: "#e53935",
-          "red-dark": "#c62828",
-          "red-light": "#ff6659",
+          // Accent kept under "red"-keys for legacy class names; values are green now.
+          red: "#22c55e",
+          "red-dark": "#16a34a",
+          "red-light": "#4ade80",
           gold: "#d4a855",
           text: "#ffffff",
           "text-muted": "#9ca3af",
@@ -43,8 +44,8 @@ const config: Config = {
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
         "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 20px rgba(229, 57, 53, 0.3)" },
-          "50%": { boxShadow: "0 0 40px rgba(229, 57, 53, 0.5)" },
+          "0%, 100%": { boxShadow: "0 0 20px rgba(34, 197, 94, 0.3)" },
+          "50%": { boxShadow: "0 0 40px rgba(34, 197, 94, 0.5)" },
         },
       },
     },

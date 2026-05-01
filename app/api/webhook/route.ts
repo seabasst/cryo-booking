@@ -5,6 +5,7 @@ import {
   sendCustomerConfirmation,
   sendBusinessNotification,
 } from "@/lib/email";
+import { sendCustomerSms } from "@/lib/sms";
 import Stripe from "stripe";
 
 // Disable body parsing for webhook route
@@ -66,17 +67,18 @@ export async function POST(request: NextRequest) {
           console.error("Error creating booking:", bookingError);
         }
 
-        const emailResults = await Promise.allSettled([
+        const notificationResults = await Promise.allSettled([
           sendCustomerConfirmation(bookingData),
           sendBusinessNotification(bookingData),
+          sendCustomerSms(bookingData),
         ]);
 
-        emailResults.forEach((result, i) => {
-          const label = i === 0 ? "customer" : "business";
+        const labels = ["customer email", "business email", "customer sms"];
+        notificationResults.forEach((result, i) => {
           if (result.status === "fulfilled") {
-            console.log(`📧 Sent ${label} email`);
+            console.log(`✅ Sent ${labels[i]}`);
           } else {
-            console.error(`Failed to send ${label} email:`, result.reason);
+            console.error(`Failed to send ${labels[i]}:`, result.reason);
           }
         });
       } else {

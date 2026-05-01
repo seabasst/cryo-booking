@@ -53,7 +53,7 @@ export async function sendCustomerConfirmation(data: BookingEmailData) {
     <head><meta charset="utf-8" /></head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0a; color: #f5f5f5; margin: 0; padding: 40px 20px;">
       <div style="max-width: 560px; margin: 0 auto; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; overflow: hidden;">
-        <div style="background: #dc2626; padding: 32px 24px; text-align: center;">
+        <div style="background: #22c55e; padding: 32px 24px; text-align: center;">
           <h1 style="margin: 0; color: #fff; font-size: 24px;">Din bokning är bekräftad</h1>
         </div>
         <div style="padding: 32px 24px;">
@@ -68,8 +68,8 @@ export async function sendCustomerConfirmation(data: BookingEmailData) {
             <tr><td style="padding: 12px 0; color: #a0a0a0;">Betalt</td><td style="padding: 12px 0; text-align: right; color: #22c55e; font-weight: 600;">${formatPrice(data.price)}</td></tr>
           </table>
 
-          <div style="background: #261010; border: 1px solid #dc262640; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
-            <p style="margin: 0 0 8px; color: #fca5a5; font-weight: 600;">Förberedelser inför din session</p>
+          <div style="background: #261010; border: 1px solid #22c55e40; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+            <p style="margin: 0 0 8px; color: #86efac; font-weight: 600;">Förberedelser inför din session</p>
             <ul style="margin: 0; padding-left: 18px; color: #d0d0d0; font-size: 14px;">
               <li>Kom 10 minuter innan din bokade tid</li>
               <li>Undvik alkohol och stora måltider innan</li>
@@ -77,7 +77,7 @@ export async function sendCustomerConfirmation(data: BookingEmailData) {
             </ul>
           </div>
 
-          <p style="margin: 0; color: #808080; font-size: 13px;">Behöver du avboka eller ändra? Hör av dig till <a href="mailto:${BUSINESS_EMAIL}" style="color: #fca5a5;">${BUSINESS_EMAIL}</a>.</p>
+          <p style="margin: 0; color: #808080; font-size: 13px;">Behöver du avboka eller ändra? Hör av dig till <a href="mailto:${BUSINESS_EMAIL}" style="color: #86efac;">${BUSINESS_EMAIL}</a>.</p>
         </div>
       </div>
     </body>
@@ -104,7 +104,7 @@ export async function sendBusinessNotification(data: BookingEmailData) {
     <head><meta charset="utf-8" /></head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #111; margin: 0; padding: 40px 20px;">
       <div style="max-width: 560px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 32px;">
-        <h2 style="margin: 0 0 8px; color: #dc2626;">Ny bokning – blocka i Bokadirekt</h2>
+        <h2 style="margin: 0 0 8px; color: #22c55e;">Ny bokning – blocka i Bokadirekt</h2>
         <p style="margin: 0 0 24px; color: #666;">En kund har betalat för en behandling. Blocka denna tid i er Bokadirekt-kalender.</p>
 
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
