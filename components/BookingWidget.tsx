@@ -1,8 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { BookingStep, TimeSlot, CustomerInfo, Service } from "@/lib/types";
-import ServiceSelector from "./ServiceSelector";
+import type {
+  BookingStep,
+  TimeSlot,
+  CustomerInfo,
+  Service,
+  TreatmentFamily,
+} from "@/lib/types";
+import { getServicesForFamily } from "@/lib/services";
+import TreatmentGrid from "./TreatmentGrid";
+import VariantPicker from "./VariantPicker";
 import DatePicker from "./DatePicker";
 import TimeSlots from "./TimeSlots";
 import CustomerForm from "./CustomerForm";
@@ -10,14 +18,13 @@ import OrderSummary from "./OrderSummary";
 
 interface BookingWidgetProps {
   cancelled?: boolean;
-  initialCategory?: string;
 }
 
-export default function BookingWidget({
-  cancelled,
-  initialCategory,
-}: BookingWidgetProps) {
+export default function BookingWidget({ cancelled }: BookingWidgetProps) {
   const [currentStep, setCurrentStep] = useState<BookingStep>(1);
+  const [selectedFamily, setSelectedFamily] = useState<TreatmentFamily | null>(
+    null
+  );
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
@@ -31,9 +38,28 @@ export default function BookingWidget({
     }
   }, [cancelled]);
 
-  const handleServiceSelect = (service: Service) => {
+  const handleFamilySelect = (family: TreatmentFamily) => {
+    const services = getServicesForFamily(family.id);
+    if (services.length === 1) {
+      // Skip variant picker — go straight to date/time
+      setSelectedFamily(family);
+      setSelectedService(services[0]);
+      setCurrentStep(2);
+    } else {
+      // Show variant picker (still within step 1)
+      setSelectedFamily(family);
+      setSelectedService(null);
+    }
+  };
+
+  const handleVariantSelect = (service: Service) => {
     setSelectedService(service);
     setCurrentStep(2);
+  };
+
+  const handleBackToFamilies = () => {
+    setSelectedFamily(null);
+    setSelectedService(null);
   };
 
   const handleDateSelect = (date: string) => {
@@ -58,15 +84,22 @@ export default function BookingWidget({
 
   const handleBackToStep1 = () => {
     setCurrentStep(1);
+    // If family has only 1 service, returning to step 1 should show the grid.
+    // Otherwise keep selectedFamily so user lands on the variant picker.
+    if (selectedFamily) {
+      const services = getServicesForFamily(selectedFamily.id);
+      if (services.length === 1) {
+        setSelectedFamily(null);
+        setSelectedService(null);
+      }
+    }
   };
 
-  const handleBackToStep2 = () => {
-    setCurrentStep(2);
-  };
+  const handleBackToStep2 = () => setCurrentStep(2);
+  const handleBackToStep3 = () => setCurrentStep(3);
 
-  const handleBackToStep3 = () => {
-    setCurrentStep(3);
-  };
+  const isStep1Grid = currentStep === 1 && !selectedFamily;
+  const containerClass = isStep1Grid ? "w-full" : "w-full max-w-md mx-auto";
 
   const steps = [
     { number: 1, label: "Behandling" },
@@ -76,10 +109,10 @@ export default function BookingWidget({
   ];
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className={containerClass}>
       {/* Cancelled Message */}
       {showCancelledMessage && (
-        <div className="mb-4 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-200 text-sm animate-fade-in">
+        <div className="max-w-md mx-auto mb-4 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-200 text-sm animate-fade-in">
           <div className="flex items-center gap-2">
             <svg
               className="w-5 h-5"
@@ -99,169 +132,174 @@ export default function BookingWidget({
         </div>
       )}
 
-      {/* Container */}
-      <div className="relative p-6 rounded-xl bg-fsa-gray border border-fsa-gray-light">
-        {/* Step Indicator */}
-        <div className="flex items-center justify-center gap-1 mb-6">
-          {steps.map((step, index) => (
-            <div key={step.number} className="flex items-center">
-              <div
-                className={`
-                  flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold
-                  transition-all duration-300
-                  ${
-                    currentStep >= step.number
-                      ? "bg-fsa-red text-white"
-                      : "bg-fsa-gray-light text-fsa-text-muted border border-fsa-text-dim/30"
-                  }
-                `}
-              >
-                {currentStep > step.number ? (
-                  <svg
-                    className="w-3.5 h-3.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={3}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                ) : (
-                  step.number
-                )}
-              </div>
-              <span
-                className={`
-                  ml-1 text-[10px] font-medium hidden sm:inline
-                  ${
-                    currentStep >= step.number
-                      ? "text-fsa-text"
-                      : "text-fsa-text-muted"
-                  }
-                `}
-              >
-                {step.label}
-              </span>
-              {index < steps.length - 1 && (
+      {/* Step 1 — Treatment grid (full width, no container chrome) */}
+      {isStep1Grid && (
+        <div className="animate-fade-in">
+          <TreatmentGrid onFamilySelect={handleFamilySelect} />
+        </div>
+      )}
+
+      {/* Step 1.5 — Variant picker (narrow, with container) */}
+      {currentStep === 1 && selectedFamily && (
+        <div className="p-6 rounded-xl bg-fsa-gray border border-fsa-gray-light">
+          <VariantPicker
+            family={selectedFamily}
+            onVariantSelect={handleVariantSelect}
+            onBack={handleBackToFamilies}
+          />
+        </div>
+      )}
+
+      {/* Steps 2–4 — booking flow */}
+      {currentStep >= 2 && (
+        <div className="relative p-6 rounded-xl bg-fsa-gray border border-fsa-gray-light">
+          {/* Step Indicator */}
+          <div className="flex items-center justify-center gap-1 mb-6">
+            {steps.map((step, index) => (
+              <div key={step.number} className="flex items-center">
                 <div
                   className={`
-                    w-4 sm:w-6 h-0.5 mx-1
+                    flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold
                     transition-all duration-300
                     ${
-                      currentStep > step.number
-                        ? "bg-fsa-red"
-                        : "bg-fsa-gray-light"
+                      currentStep >= step.number
+                        ? "bg-fsa-red text-white"
+                        : "bg-fsa-gray-light text-fsa-text-muted border border-fsa-text-dim/30"
                     }
                   `}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Step Content */}
-        <div className="min-h-[400px]">
-          {/* Step 1: Select Service */}
-          {currentStep === 1 && (
-            <div className="animate-fade-in">
-              <h2 className="text-xl font-semibold text-fsa-text mb-4">
-                Välj behandling
-              </h2>
-              <ServiceSelector
-                initialCategory={initialCategory}
-                onServiceSelect={handleServiceSelect}
-              />
-            </div>
-          )}
-
-          {/* Step 2: Select Date & Time */}
-          {currentStep === 2 && selectedService && (
-            <div className="animate-fade-in">
-              {/* Selected Service Summary */}
-              <div className="mb-4 p-3 rounded-lg bg-fsa-red/10 border border-fsa-red/30">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-fsa-text font-medium">
-                      {selectedService.name}
-                    </p>
-                    <p className="text-fsa-text-muted text-sm">
-                      {selectedService.duration} min
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-fsa-red font-bold">
-                      {selectedService.price.toLocaleString("sv-SE")} kr
-                    </p>
-                    <button
-                      onClick={handleBackToStep1}
-                      className="text-xs text-fsa-text-muted hover:text-fsa-red transition-colors"
+                >
+                  {currentStep > step.number ? (
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
                     >
-                      Ändra
-                    </button>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={3}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  ) : (
+                    step.number
+                  )}
+                </div>
+                <span
+                  className={`
+                    ml-1 text-[10px] font-medium hidden sm:inline
+                    ${
+                      currentStep >= step.number
+                        ? "text-fsa-text"
+                        : "text-fsa-text-muted"
+                    }
+                  `}
+                >
+                  {step.label}
+                </span>
+                {index < steps.length - 1 && (
+                  <div
+                    className={`
+                      w-4 sm:w-6 h-0.5 mx-1
+                      transition-all duration-300
+                      ${
+                        currentStep > step.number
+                          ? "bg-fsa-red"
+                          : "bg-fsa-gray-light"
+                      }
+                    `}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="min-h-[400px]">
+            {/* Step 2 — Date & Time */}
+            {currentStep === 2 && selectedService && (
+              <div className="animate-fade-in">
+                <div className="mb-4 p-3 rounded-lg bg-fsa-red/10 border border-fsa-red/30">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-fsa-text font-medium">
+                        {selectedService.name}
+                      </p>
+                      <p className="text-fsa-text-muted text-sm">
+                        {selectedService.duration} min
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-fsa-red font-bold">
+                        {selectedService.price.toLocaleString("sv-SE")} kr
+                      </p>
+                      <button
+                        onClick={handleBackToStep1}
+                        className="text-xs text-fsa-text-muted hover:text-fsa-red transition-colors"
+                      >
+                        Ändra
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <h2 className="text-xl font-semibold text-fsa-text mb-4">
-                Välj datum och tid
-              </h2>
-              <DatePicker
-                selectedDate={selectedDate}
-                onDateSelect={handleDateSelect}
-              />
-              {selectedDate && (
-                <TimeSlots
+                <h2 className="text-xl font-semibold text-fsa-text mb-4">
+                  Välj datum och tid
+                </h2>
+                <DatePicker
+                  selectedDate={selectedDate}
+                  onDateSelect={handleDateSelect}
+                />
+                {selectedDate && (
+                  <TimeSlots
+                    selectedDate={selectedDate}
+                    selectedSlot={selectedSlot}
+                    onSlotSelect={handleSlotSelect}
+                  />
+                )}
+                {selectedDate && selectedSlot && (
+                  <button
+                    onClick={handleContinueToStep3}
+                    className="w-full mt-6 py-3 px-4 rounded-lg bg-fsa-red text-white font-semibold
+                      hover:bg-fsa-red-dark transition-all duration-200 animate-slide-up"
+                  >
+                    Fortsätt
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Step 3 — Customer Form */}
+            {currentStep === 3 &&
+              selectedService &&
+              selectedDate &&
+              selectedSlot && (
+                <CustomerForm
+                  selectedService={selectedService}
                   selectedDate={selectedDate}
                   selectedSlot={selectedSlot}
-                  onSlotSelect={handleSlotSelect}
+                  onSubmit={handleCustomerSubmit}
+                  onBack={handleBackToStep2}
                 />
               )}
-              {selectedDate && selectedSlot && (
-                <button
-                  onClick={handleContinueToStep3}
-                  className="w-full mt-6 py-3 px-4 rounded-lg bg-fsa-red text-white font-semibold
-                    hover:bg-fsa-red-dark transition-all duration-200 animate-slide-up"
-                >
-                  Fortsätt
-                </button>
+
+            {/* Step 4 — Order Summary */}
+            {currentStep === 4 &&
+              selectedService &&
+              selectedDate &&
+              selectedSlot &&
+              customerInfo && (
+                <OrderSummary
+                  selectedService={selectedService}
+                  selectedDate={selectedDate}
+                  selectedSlot={selectedSlot}
+                  customerInfo={customerInfo}
+                  onBack={handleBackToStep3}
+                />
               )}
-            </div>
-          )}
-
-          {/* Step 3: Customer Form */}
-          {currentStep === 3 &&
-            selectedService &&
-            selectedDate &&
-            selectedSlot && (
-              <CustomerForm
-                selectedService={selectedService}
-                selectedDate={selectedDate}
-                selectedSlot={selectedSlot}
-                onSubmit={handleCustomerSubmit}
-                onBack={handleBackToStep2}
-              />
-            )}
-
-          {/* Step 4: Order Summary */}
-          {currentStep === 4 &&
-            selectedService &&
-            selectedDate &&
-            selectedSlot &&
-            customerInfo && (
-              <OrderSummary
-                selectedService={selectedService}
-                selectedDate={selectedDate}
-                selectedSlot={selectedSlot}
-                customerInfo={customerInfo}
-                onBack={handleBackToStep3}
-              />
-            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

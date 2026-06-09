@@ -1,6 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable experimental features if needed
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.squarespace-cdn.com",
+      },
+    ],
+  },
 };
 
 module.exports = nextConfig;

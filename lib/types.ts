@@ -18,6 +18,15 @@ export interface ServiceCategory {
   services: Service[];
 }
 
+export interface TreatmentFamily {
+  id: string;
+  name: string;
+  image: string;
+  description: string;
+  priceText: string;
+  serviceIds: string[];
+}
+
 export interface TimeSlot {
   id: string;
   time: string;
