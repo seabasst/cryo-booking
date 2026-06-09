@@ -38,9 +38,34 @@ export default function TreatmentGrid({ onFamilySelect }: TreatmentGridProps) {
             <p className="text-fsa-text-muted text-sm leading-relaxed mb-4 flex-1">
               {family.description}
             </p>
-            <p className="text-xs text-fsa-text-dim mb-4 font-mono">
-              {family.priceText}
-            </p>
+
+            {/* Pricing tiers */}
+            <div className="mb-5 -mx-1 flex flex-wrap gap-1.5">
+              {family.priceTiers.map((tier, i) => (
+                <div
+                  key={i}
+                  className={`
+                    inline-flex items-baseline gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium
+                    ${
+                      tier.highlight
+                        ? "bg-fsa-red/20 border border-fsa-red/50 text-fsa-red-light"
+                        : "bg-fsa-dark border border-fsa-gray-light text-fsa-text"
+                    }
+                  `}
+                >
+                  <span
+                    className={
+                      tier.highlight ? "text-fsa-red-light" : "text-fsa-text-muted"
+                    }
+                  >
+                    {tier.label}
+                  </span>
+                  <span className="font-bold">
+                    {tier.price.toLocaleString("sv-SE")} kr
+                  </span>
+                </div>
+              ))}
+            </div>
 
             <span
               className="inline-flex items-center justify-center gap-2 mt-auto

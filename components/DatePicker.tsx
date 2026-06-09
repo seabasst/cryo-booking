@@ -1,154 +1,226 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { DateOption } from "@/lib/types";
+import { useMemo, useState } from "react";
 
 interface DatePickerProps {
   selectedDate: string | null;
   onDateSelect: (date: string) => void;
 }
 
-const DAYS_SV = ["Sön", "Mån", "Tis", "Ons", "Tor", "Fre", "Lör"];
+const DAYS_SV = ["Mån", "Tis", "Ons", "Tor", "Fre", "Lör", "Sön"];
 const MONTHS_SV = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
+  "Januari",
+  "Februari",
+  "Mars",
+  "April",
   "Maj",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Okt",
-  "Nov",
-  "Dec",
+  "Juni",
+  "Juli",
+  "Augusti",
+  "September",
+  "Oktober",
+  "November",
+  "December",
 ];
+
+const MAX_MONTHS_AHEAD = 2;
+
+function startOfDay(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function addMonths(d: Date, n: number): Date {
+  return new Date(d.getFullYear(), d.getMonth() + n, 1);
+}
+
+function formatYmd(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function isSameDay(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
 
 export default function DatePicker({
   selectedDate,
   onDateSelect,
 }: DatePickerProps) {
-  const [dateOptions, setDateOptions] = useState<DateOption[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchDates() {
-      const dates: DateOption[] = [];
-      const today = new Date();
-
-      for (let i = 0; i < 7; i++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() + i);
-
-        const dateString = date.toISOString().split("T")[0];
-
-        // Hämta antal lediga tider för varje dag
-        try {
-          const response = await fetch(
-            `/api/available-slots?date=${dateString}`
-          );
-          const data = await response.json();
-          const availableCount = data.slots.filter(
-            (s: { available: boolean }) => s.available
-          ).length;
-
-          dates.push({
-            date: dateString,
-            dayName: DAYS_SV[date.getDay()],
-            dayNumber: date.getDate(),
-            month: MONTHS_SV[date.getMonth()],
-            availableCount,
-          });
-        } catch (error) {
-          console.error("Error fetching slots for", dateString, error);
-          dates.push({
-            date: dateString,
-            dayName: DAYS_SV[date.getDay()],
-            dayNumber: date.getDate(),
-            month: MONTHS_SV[date.getMonth()],
-            availableCount: 0,
-          });
-        }
-      }
-
-      setDateOptions(dates);
-      setIsLoading(false);
-    }
-
-    fetchDates();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-        {[...Array(7)].map((_, i) => (
-          <div
-            key={i}
-            className="flex-shrink-0 w-20 h-24 rounded-lg bg-fsa-gray-light animate-pulse"
-          />
-        ))}
-      </div>
+  const today = useMemo(() => startOfDay(new Date()), []);
+  const maxDate = useMemo(() => {
+    // Allow up to last day of (today.month + MAX_MONTHS_AHEAD)
+    const lastMonthStart = addMonths(today, MAX_MONTHS_AHEAD);
+    return new Date(
+      lastMonthStart.getFullYear(),
+      lastMonthStart.getMonth() + 1,
+      0 // last day of that month
     );
-  }
+  }, [today]);
+
+  const [viewMonth, setViewMonth] = useState<Date>(
+    new Date(today.getFullYear(), today.getMonth(), 1)
+  );
+
+  const canGoPrev =
+    viewMonth.getFullYear() > today.getFullYear() ||
+    viewMonth.getMonth() > today.getMonth();
+
+  const canGoNext =
+    viewMonth.getFullYear() < maxDate.getFullYear() ||
+    (viewMonth.getFullYear() === maxDate.getFullYear() &&
+      viewMonth.getMonth() < maxDate.getMonth());
+
+  // Build calendar grid: 6 rows × 7 cols, padded from previous/next month
+  const cells = useMemo(() => {
+    const year = viewMonth.getFullYear();
+    const month = viewMonth.getMonth();
+    const firstOfMonth = new Date(year, month, 1);
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    // JS getDay(): Sun=0..Sat=6. We want Mon-first → shift.
+    const jsWeekday = firstOfMonth.getDay();
+    const leadingBlanks = (jsWeekday + 6) % 7; // Mon=0..Sun=6
+
+    const arr: Array<{ date: Date | null; ymd: string | null }> = [];
+    for (let i = 0; i < leadingBlanks; i++) {
+      arr.push({ date: null, ymd: null });
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(year, month, d);
+      arr.push({ date, ymd: formatYmd(date) });
+    }
+    // Fill to multiple of 7
+    while (arr.length % 7 !== 0) {
+      arr.push({ date: null, ymd: null });
+    }
+    return arr;
+  }, [viewMonth]);
+
+  const handlePrev = () => {
+    if (canGoPrev) setViewMonth(addMonths(viewMonth, -1));
+  };
+  const handleNext = () => {
+    if (canGoNext) setViewMonth(addMonths(viewMonth, 1));
+  };
 
   return (
-    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-      {dateOptions.map((option) => {
-        const isSelected = selectedDate === option.date;
-        const hasSlots = option.availableCount > 0;
-
-        return (
-          <button
-            key={option.date}
-            onClick={() => hasSlots && onDateSelect(option.date)}
-            disabled={!hasSlots}
-            className={`
-              flex-shrink-0 w-20 p-3 rounded-lg transition-all duration-300
-              flex flex-col items-center gap-1
-              ${
-                isSelected
-                  ? "bg-fsa-red text-white"
-                  : hasSlots
-                  ? "bg-fsa-dark border border-fsa-gray-light hover:border-fsa-red/50"
-                  : "bg-fsa-darker border border-fsa-gray-light/50 opacity-50 cursor-not-allowed"
-              }
-            `}
+    <div className="bg-fsa-dark border border-fsa-gray-light rounded-xl p-4 sm:p-5">
+      {/* Header — month nav */}
+      <div className="flex items-center justify-between mb-4">
+        <button
+          type="button"
+          onClick={handlePrev}
+          disabled={!canGoPrev}
+          aria-label="Föregående månad"
+          className="w-9 h-9 rounded-lg flex items-center justify-center
+            text-fsa-text disabled:text-fsa-text-dim
+            hover:bg-fsa-gray disabled:hover:bg-transparent
+            disabled:cursor-not-allowed transition-colors"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            <span
-              className={`text-xs font-medium ${
-                isSelected ? "text-white/80" : "text-fsa-text-muted"
-              }`}
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </button>
+        <div className="text-fsa-text font-semibold text-base sm:text-lg">
+          {MONTHS_SV[viewMonth.getMonth()]} {viewMonth.getFullYear()}
+        </div>
+        <button
+          type="button"
+          onClick={handleNext}
+          disabled={!canGoNext}
+          aria-label="Nästa månad"
+          className="w-9 h-9 rounded-lg flex items-center justify-center
+            text-fsa-text disabled:text-fsa-text-dim
+            hover:bg-fsa-gray disabled:hover:bg-transparent
+            disabled:cursor-not-allowed transition-colors"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </button>
+      </div>
+
+      {/* Weekday labels */}
+      <div className="grid grid-cols-7 gap-1 mb-2">
+        {DAYS_SV.map((d) => (
+          <div
+            key={d}
+            className="text-center text-[11px] sm:text-xs font-medium text-fsa-text-muted uppercase tracking-wider"
+          >
+            {d}
+          </div>
+        ))}
+      </div>
+
+      {/* Day cells */}
+      <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
+        {cells.map((cell, i) => {
+          if (!cell.date || !cell.ymd) {
+            return <div key={`blank-${i}`} className="aspect-square" />;
+          }
+          const isPast = cell.date < today;
+          const isFuture = cell.date > maxDate;
+          const isDisabled = isPast || isFuture;
+          const isToday = isSameDay(cell.date, today);
+          const isSelected = selectedDate === cell.ymd;
+
+          return (
+            <button
+              key={cell.ymd}
+              type="button"
+              onClick={() => !isDisabled && onDateSelect(cell.ymd!)}
+              disabled={isDisabled}
+              className={`
+                aspect-square rounded-lg text-sm sm:text-base font-medium
+                transition-all duration-150 relative
+                ${
+                  isSelected
+                    ? "bg-fsa-red text-white shadow-lg shadow-fsa-red/30 scale-105"
+                    : isDisabled
+                    ? "text-fsa-text-dim/50 cursor-not-allowed"
+                    : "text-fsa-text hover:bg-fsa-gray hover:scale-105"
+                }
+                ${
+                  isToday && !isSelected
+                    ? "ring-1 ring-fsa-red/60"
+                    : ""
+                }
+              `}
             >
-              {option.dayName}
-            </span>
-            <span
-              className={`text-2xl font-bold ${
-                isSelected ? "text-white" : "text-fsa-text"
-              }`}
-            >
-              {option.dayNumber}
-            </span>
-            <span
-              className={`text-xs ${
-                isSelected ? "text-white/80" : "text-fsa-text-muted"
-              }`}
-            >
-              {option.month}
-            </span>
-            <span
-              className={`text-[10px] mt-1 ${
-                isSelected
-                  ? "text-white/70"
-                  : hasSlots
-                  ? "text-fsa-red"
-                  : "text-fsa-text-dim"
-              }`}
-            >
-              {hasSlots ? `${option.availableCount} tider` : "Fullbokat"}
-            </span>
-          </button>
-        );
-      })}
+              {cell.date.getDate()}
+            </button>
+          );
+        })}
+      </div>
+
+      <p className="text-[11px] text-fsa-text-dim mt-4 text-center">
+        Boka upp till 2 månader framåt
+      </p>
     </div>
   );
 }

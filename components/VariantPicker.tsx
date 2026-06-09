@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { getServicesForFamily } from "@/lib/services";
 import type { Service, TreatmentFamily } from "@/lib/types";
+import BackBar from "./BackBar";
 
 interface VariantPickerProps {
   family: TreatmentFamily;
@@ -33,17 +34,8 @@ export default function VariantPicker({
 
   return (
     <div className="animate-fade-in">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-fsa-text">{family.name}</h2>
-        <button
-          type="button"
-          onClick={onBack}
-          className="text-xs text-fsa-text-muted hover:text-fsa-red transition-colors"
-        >
-          ← Tillbaka
-        </button>
-      </div>
-
+      <BackBar label="behandlingar" onBack={onBack} />
+      <h2 className="text-xl font-semibold text-fsa-text mb-2">{family.name}</h2>
       <p className="text-sm text-fsa-text-muted mb-5">{family.description}</p>
 
       <div className="space-y-5">

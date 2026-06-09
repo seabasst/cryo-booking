@@ -272,7 +272,11 @@ export const TREATMENT_FAMILIES: TreatmentFamily[] = [
       "https://images.squarespace-cdn.com/content/v1/66def6493457365fcadf9c12/4073ffa1-1379-40dc-9c5b-20e6696c6c07/cryokammare.jpg",
     description:
       "Helkroppsbehandling i -87°C. Tre minuter i kryokammaren stärker hälsan genom kontrollerad kylexponering och påskyndar muskelåterhämtningen efter träning.",
-    priceText: "1x 150 kr  ·  5-kort 600 kr  ·  10-kort 900 kr",
+    priceTiers: [
+      { label: "1x", price: 150 },
+      { label: "5-kort", price: 600 },
+      { label: "10-kort", price: 900 },
+    ],
     serviceIds: [
       "kryoterapi-10",
       "kryoterapi-klippkort-5",
@@ -286,7 +290,10 @@ export const TREATMENT_FAMILIES: TreatmentFamily[] = [
       "https://images.squarespace-cdn.com/content/v1/66def6493457365fcadf9c12/5274583b-cb0e-4780-bc25-cb3ee7b2eab6/ro%CC%88dljusterapi.jpg",
     description:
       "Rödljus stimulerar cellförnyelse och hjälper hud och muskelvävnad att läka. Låg värme, skadar inte huden.",
-    priceText: "1x 200 kr  ·  10-kort 1000 kr",
+    priceTiers: [
+      { label: "1x", price: 200 },
+      { label: "10-kort", price: 1000 },
+    ],
     serviceIds: ["rodljusterapi", "rodljus-10kort"],
   },
   {
@@ -296,7 +303,7 @@ export const TREATMENT_FAMILIES: TreatmentFamily[] = [
       "https://images.squarespace-cdn.com/content/v1/66def6493457365fcadf9c12/e56f38ad-18d1-408c-b954-959cd1ee6c0b/fsa.jpg",
     description:
       "Kompressionsbyxor som boostar återhämtningen, blodcirkulationen och tar bort slaggprodukter. Vanlig behandling efter match eller hård träning.",
-    priceText: "1x 200 kr",
+    priceTiers: [{ label: "1x", price: 200 }],
     serviceIds: ["recovery-ultimate"],
   },
   {
@@ -306,7 +313,10 @@ export const TREATMENT_FAMILIES: TreatmentFamily[] = [
       "https://images.squarespace-cdn.com/content/v1/66def6493457365fcadf9c12/639010df-6cd9-464c-965b-576e58dc57d4/insculpt+chair+fsa.jpg",
     description:
       "Elektromagnetisk behandling för bäckenbotten. 28 minuter som utför tusentals sammandragningar — helt icke-invasivt.",
-    priceText: "KAMPANJ 499 kr  ·  1x 1350 kr",
+    priceTiers: [
+      { label: "Kampanj", price: 499, highlight: true },
+      { label: "1x", price: 1350 },
+    ],
     serviceIds: ["insculpt-chair-kampanj", "insculpt-chair"],
   },
   {
@@ -316,7 +326,11 @@ export const TREATMENT_FAMILIES: TreatmentFamily[] = [
       "https://images.squarespace-cdn.com/content/v1/66def6493457365fcadf9c12/b60d0e3c-28f4-4fac-827c-9c5823add68b/massage+studo+stockholm.jpg",
     description:
       "Deep tissue, sportmassage och klassisk svensk massage — för både vardagsmotionärer och elitidrottare. Inkluderar koppning vid behov.",
-    priceText: "25 min 500 kr  ·  45 min 900 kr  ·  60 min 1100 kr",
+    priceTiers: [
+      { label: "25 min", price: 500 },
+      { label: "45 min", price: 900 },
+      { label: "60 min", price: 1100 },
+    ],
     serviceIds: [
       "deep-tissue-25",
       "deep-tissue-45",
@@ -343,7 +357,11 @@ export const TREATMENT_FAMILIES: TreatmentFamily[] = [
       "https://images.squarespace-cdn.com/content/v1/66def6493457365fcadf9c12/55c40468-fac4-4101-ad00-c57057e1c374/fsa_insculpt.jpg",
     description:
       "Stimulerar muskelsammandragning för fettförlust på envisa områden runt mage och skinkor. Bra för att återaktivera djupare kärnmuskler efter förlossning.",
-    priceText: "KAMPANJ 499 kr  ·  1x 1300 kr  ·  10x 6500 kr",
+    priceTiers: [
+      { label: "Kampanj", price: 499, highlight: true },
+      { label: "1x", price: 1300 },
+      { label: "10-kort", price: 6500 },
+    ],
     serviceIds: [
       "insculpt-kampanj",
       "insculpt-45",

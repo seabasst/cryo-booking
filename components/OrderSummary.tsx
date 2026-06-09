@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { CustomerInfo, TimeSlot, Service } from "@/lib/types";
 import EmbeddedCheckoutModal from "./EmbeddedCheckoutModal";
+import BackBar from "./BackBar";
 
 interface OrderSummaryProps {
   selectedService: Service;
@@ -91,6 +92,7 @@ export default function OrderSummary({
       />
     )}
     <div className="animate-slide-up">
+      <BackBar label="dina uppgifter" onBack={onBack} />
       <h3 className="text-lg font-semibold text-fsa-text mb-4">
         Bekräfta din bokning
       </h3>

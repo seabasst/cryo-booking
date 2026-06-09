@@ -18,12 +18,18 @@ export interface ServiceCategory {
   services: Service[];
 }
 
+export interface PriceTier {
+  label: string; // e.g. "1x", "10-kort", "25 min"
+  price: number; // SEK
+  highlight?: boolean; // visually emphasized (e.g. campaign price)
+}
+
 export interface TreatmentFamily {
   id: string;
   name: string;
   image: string;
   description: string;
-  priceText: string;
+  priceTiers: PriceTier[];
   serviceIds: string[];
 }
 

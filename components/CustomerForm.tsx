@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { CustomerInfo, TimeSlot, Service } from "@/lib/types";
+import BackBar from "./BackBar";
 
 interface CustomerFormProps {
   selectedService: Service;
@@ -75,6 +76,8 @@ export default function CustomerForm({
 
   return (
     <div className="animate-slide-up">
+      <BackBar label="datum & tid" onBack={onBack} />
+
       {/* Booking Summary */}
       <div className="mb-6 p-4 rounded-xl bg-fsa-red/10 border border-fsa-red/30">
         <div className="flex items-center gap-3">

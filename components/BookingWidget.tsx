@@ -15,6 +15,7 @@ import DatePicker from "./DatePicker";
 import TimeSlots from "./TimeSlots";
 import CustomerForm from "./CustomerForm";
 import OrderSummary from "./OrderSummary";
+import BackBar from "./BackBar";
 
 interface BookingWidgetProps {
   cancelled?: boolean;
@@ -219,6 +220,8 @@ export default function BookingWidget({ cancelled }: BookingWidgetProps) {
             {/* Step 2 — Date & Time */}
             {currentStep === 2 && selectedService && (
               <div className="animate-fade-in">
+                <BackBar label="behandlingar" onBack={handleBackToStep1} />
+
                 <div className="mb-4 p-3 rounded-lg bg-fsa-red/10 border border-fsa-red/30">
                   <div className="flex justify-between items-center">
                     <div>
@@ -229,17 +232,9 @@ export default function BookingWidget({ cancelled }: BookingWidgetProps) {
                         {selectedService.duration} min
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-fsa-red font-bold">
-                        {selectedService.price.toLocaleString("sv-SE")} kr
-                      </p>
-                      <button
-                        onClick={handleBackToStep1}
-                        className="text-xs text-fsa-text-muted hover:text-fsa-red transition-colors"
-                      >
-                        Ändra
-                      </button>
-                    </div>
+                    <p className="text-fsa-red font-bold">
+                      {selectedService.price.toLocaleString("sv-SE")} kr
+                    </p>
                   </div>
                 </div>
 
