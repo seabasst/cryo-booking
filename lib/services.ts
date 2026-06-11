@@ -11,25 +11,25 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
     icon: "❄️",
     services: [
       {
-        id: "kryoterapi-10",
-        name: "Kryoterapi",
+        id: "kryoterapi-prova-pa",
+        name: "Kryoterapi – prova på",
         duration: 10,
         price: 150,
-        description: "Helkroppsbehandling i -87°C",
+        description: "Helkroppsbehandling i -87°C – introduktionspris",
         popular: true,
       },
       {
-        id: "kryoterapi-klippkort-5",
-        name: "Kryoterapi 5-kort",
+        id: "kryoterapi-10",
+        name: "Kryoterapi",
         duration: 10,
-        price: 600,
-        description: "5 behandlingar",
+        price: 500,
+        description: "Helkroppsbehandling i -87°C",
       },
       {
         id: "kryoterapi-klippkort-10",
         name: "Kryoterapi 10-kort",
         duration: 10,
-        price: 900,
+        price: 4000,
         description: "10 behandlingar",
       },
       {
@@ -53,6 +53,13 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
         price: 200,
         description:
           "Kompressionsbyxor – boostar återhämtningen, blodcirkulationen och tar bort slaggprodukter",
+      },
+      {
+        id: "compression-10kort",
+        name: "Compression Therapy 10-kort",
+        duration: 20,
+        price: 1000,
+        description: "10 behandlingar",
       },
     ],
   },
@@ -214,12 +221,6 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
         price: 6500,
       },
       {
-        id: "insculpt-20kort",
-        name: "Insculpt 20 behandlingar",
-        duration: 45,
-        price: 12000,
-      },
-      {
         id: "insculpt-chair-kampanj",
         name: "Insculpt Chair - KAMPANJ",
         duration: 40,
@@ -231,8 +232,14 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
         id: "insculpt-chair",
         name: "Insculpt Chair",
         duration: 40,
-        price: 1350,
+        price: 1300,
         description: "Bäckenbottenträning",
+      },
+      {
+        id: "insculpt-chair-10kort",
+        name: "Insculpt Chair 10 behandlingar",
+        duration: 40,
+        price: 6500,
       },
     ],
   },
@@ -273,13 +280,13 @@ export const TREATMENT_FAMILIES: TreatmentFamily[] = [
     description:
       "Helkroppsbehandling i -87°C. Tre minuter i kryokammaren stärker hälsan genom kontrollerad kylexponering och påskyndar muskelåterhämtningen efter träning.",
     priceTiers: [
-      { label: "1x", price: 150 },
-      { label: "5-kort", price: 600 },
-      { label: "10-kort", price: 900 },
+      { label: "Prova på", price: 150, highlight: true },
+      { label: "1x", price: 500 },
+      { label: "10-kort", price: 4000 },
     ],
     serviceIds: [
+      "kryoterapi-prova-pa",
       "kryoterapi-10",
-      "kryoterapi-klippkort-5",
       "kryoterapi-klippkort-10",
     ],
   },
@@ -303,8 +310,11 @@ export const TREATMENT_FAMILIES: TreatmentFamily[] = [
       "https://images.squarespace-cdn.com/content/v1/66def6493457365fcadf9c12/e56f38ad-18d1-408c-b954-959cd1ee6c0b/fsa.jpg",
     description:
       "Kompressionsbyxor som boostar återhämtningen, blodcirkulationen och tar bort slaggprodukter. Vanlig behandling efter match eller hård träning.",
-    priceTiers: [{ label: "1x", price: 200 }],
-    serviceIds: ["recovery-ultimate"],
+    priceTiers: [
+      { label: "1x", price: 200 },
+      { label: "10-kort", price: 1000 },
+    ],
+    serviceIds: ["recovery-ultimate", "compression-10kort"],
   },
   {
     id: "insculpt-chair",
@@ -315,9 +325,14 @@ export const TREATMENT_FAMILIES: TreatmentFamily[] = [
       "Elektromagnetisk behandling för bäckenbotten. 28 minuter som utför tusentals sammandragningar — helt icke-invasivt.",
     priceTiers: [
       { label: "Kampanj", price: 499, highlight: true },
-      { label: "1x", price: 1350 },
+      { label: "1x", price: 1300 },
+      { label: "10-kort", price: 6500 },
     ],
-    serviceIds: ["insculpt-chair-kampanj", "insculpt-chair"],
+    serviceIds: [
+      "insculpt-chair-kampanj",
+      "insculpt-chair",
+      "insculpt-chair-10kort",
+    ],
   },
   {
     id: "massage",
@@ -366,7 +381,6 @@ export const TREATMENT_FAMILIES: TreatmentFamily[] = [
       "insculpt-kampanj",
       "insculpt-45",
       "insculpt-10kort",
-      "insculpt-20kort",
     ],
   },
 ];
