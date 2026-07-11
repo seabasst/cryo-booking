@@ -31,8 +31,9 @@ async function fetchBookingsForDate(date: string): Promise<RawBooking[]> {
     return [];
   }
 
-  // FilterDateType=1 = filter by scheduled start date
-  const url = `${BASE_URL}/api/v1/bookings?FilterDateType=1&StartDate=${date}&EndDate=${date}`;
+  // Default filter is by scheduled start date. FilterDateType=1 would filter
+  // by created date and miss future bookings — do NOT set it.
+  const url = `${BASE_URL}/api/v1/bookings?StartDate=${date}&EndDate=${date}`;
   const res = await fetch(url, {
     headers: { "X-API-Key": key },
     // Revalidate every 60s at the Next.js data-cache layer
