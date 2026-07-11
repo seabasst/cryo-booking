@@ -158,14 +158,17 @@ export async function getAvailableSlots(
   }
 
   const duration = service.duration;
-  const availableTimes = new Set<string>();
+
+  // For each candidate slot time, track: is it within ANY capable resource's
+  // working hours (i.e. worth showing), and is at least one such resource free?
+  const timeState = new Map<string, { withinHours: boolean; anyFree: boolean }>();
 
   for (const rid of family.bokadirektResourceIds) {
     const res = typedMapping.resources[rid];
     if (!res || !res.bookableOnline) continue;
 
     const hours = res.hoursByWeekday[weekday];
-    if (!hours) continue; // resource doesn't work this weekday
+    if (!hours) continue;
 
     const open = parseHm(hours.open);
     const close = parseHm(hours.close);
@@ -178,20 +181,25 @@ export async function getAvailableSlots(
       start + duration <= close;
       start += SLOT_GRANULARITY_MIN
     ) {
-      const interval: [number, number] = [start, start + duration];
-      const conflict = busy.some((b) => overlaps(interval, b));
-      if (!conflict) availableTimes.add(fmtHm(start));
+      const key = fmtHm(start);
+      const state = timeState.get(key) ?? { withinHours: false, anyFree: false };
+      state.withinHours = true;
+      if (!state.anyFree) {
+        const interval: [number, number] = [start, start + duration];
+        state.anyFree = !busy.some((b) => overlaps(interval, b));
+      }
+      timeState.set(key, state);
     }
   }
 
-  // Also compute "shown but greyed-out" past slots so the UI still renders a full day
-  // For simplicity, we only return actually-available slots.
-  const sorted = Array.from(availableTimes).sort();
-  const slots: TimeSlot[] = sorted.map((time) => ({
-    id: `slot-${date}-${time.replace(":", "")}`,
-    time,
-    available: true,
-  }));
+  const sortedTimes = Array.from(timeState.keys()).sort();
+  const slots: TimeSlot[] = sortedTimes
+    .filter((t) => timeState.get(t)!.withinHours)
+    .map((time) => ({
+      id: `slot-${date}-${time.replace(":", "")}`,
+      time,
+      available: timeState.get(time)!.anyFree,
+    }));
 
   return { date, slots };
 }
