@@ -250,5 +250,115 @@
         }
       }
     }
+  },
+  "serviceMap": {
+    "kryoterapi-prova-pa": {
+      "bokadirektServiceId": "5ac6ab79-1944-40ea-b765-93f16d34311e",
+      "bokadirektServiceName": "Kryoterapi prova på"
+    },
+    "kryoterapi-10": {
+      "bokadirektServiceId": "58c90b69-c449-4b20-a147-fc555a9be1db",
+      "bokadirektServiceName": "Kryoterapi 1 x entré"
+    },
+    "kryoterapi-klippkort-10": {
+      "bokadirektServiceId": "64926918-ce06-494c-aa65-2e584c0fb78a",
+      "bokadirektServiceName": "10 x Kryo behandlingar"
+    },
+    "rodljusterapi": {
+      "bokadirektServiceId": "b92d80b3-42a1-414e-971d-a3b7b2ed8d7c",
+      "bokadirektServiceName": "Rödljusterapi"
+    },
+    "rodljus-10kort": {
+      "bokadirektServiceId": "8a833599-6c00-431e-925c-6cc9de879a28",
+      "bokadirektServiceName": "Rödljus 10 kort"
+    },
+    "recovery-ultimate": {
+      "bokadirektServiceId": "78f43b8a-628c-4bcf-a415-37847d127f46",
+      "bokadirektServiceName": "Recovery Ultimate - Återhämtningsbyxor"
+    },
+    "deep-tissue-25": {
+      "bokadirektServiceId": "2adf81d7-7375-4014-983c-1bfb11d7608f",
+      "bokadirektServiceName": "Deep tissue massage 25 minuter"
+    },
+    "deep-tissue-45": {
+      "bokadirektServiceId": "d7d9190f-0564-452d-b84f-591e13cc9782",
+      "bokadirektServiceName": "Deep tissue massage 45 minuter"
+    },
+    "deep-tissue-60": {
+      "bokadirektServiceId": "c8b8c34b-3481-47a0-aa45-4231bbf1978e",
+      "bokadirektServiceName": "Deep tissue massage 60 minuter"
+    },
+    "deep-tissue-75": {
+      "bokadirektServiceId": "7f3424f2-20ac-465c-b3a4-374090a64f13",
+      "bokadirektServiceName": "Deep tissue massage 75 minuter"
+    },
+    "deep-tissue-90": {
+      "bokadirektServiceId": "858ce8cc-0b56-477c-abd5-0d6ae1d729f1",
+      "bokadirektServiceName": "Deep tissue massage 90 minuter"
+    },
+    "sportmassage-25": {
+      "bokadirektServiceId": "aa1c4375-f291-4e49-854f-42606eca6867",
+      "bokadirektServiceName": "Sportmassage 25"
+    },
+    "sportmassage-45": {
+      "bokadirektServiceId": "86efef83-73bc-4bf2-8438-9942ce221ac2",
+      "bokadirektServiceName": "Sportmassage 45"
+    },
+    "sportmassage-60": {
+      "bokadirektServiceId": "54853360-1808-43e6-a024-44b85e7a4d43",
+      "bokadirektServiceName": "Sportmassage 60"
+    },
+    "sportmassage-75": {
+      "bokadirektServiceId": "ca0c5bc4-978c-46cf-afce-1d6df5f89c6b",
+      "bokadirektServiceName": "Sportmassage 75"
+    },
+    "sportmassage-90": {
+      "bokadirektServiceId": "3785a750-f6e9-4510-98e8-d864deb2bde4",
+      "bokadirektServiceName": "Sportmassage 90"
+    },
+    "svensk-klassisk-25": {
+      "bokadirektServiceId": "6c909561-4b87-4644-9e8d-c4a084a36728",
+      "bokadirektServiceName": "Svensk Klassisk Massage 25"
+    },
+    "svensk-klassisk-45": {
+      "bokadirektServiceId": "ae692e29-f072-45dc-a46d-0afe5ab7ff72",
+      "bokadirektServiceName": "Svensk Klassisk Massage 45"
+    },
+    "svensk-klassisk-60": {
+      "bokadirektServiceId": "c1411235-4e63-4ceb-a1a6-e7fc2ec3017e",
+      "bokadirektServiceName": "Svensk Klassisk Massage 60"
+    },
+    "svensk-klassisk-75": {
+      "bokadirektServiceId": "7ed84ec8-b0f6-4a92-b73a-72a6fb97c548",
+      "bokadirektServiceName": "Svensk Klassisk Massage 75"
+    },
+    "svensk-klassisk-90": {
+      "bokadirektServiceId": "f70f09f0-b7c8-4a30-b479-dfd8c94aa184",
+      "bokadirektServiceName": "Svensk Klassisk Massage 90"
+    },
+    "muskelkonsultation": {
+      "bokadirektServiceId": "b9b3382c-7500-441f-b095-84664f0e0a35",
+      "bokadirektServiceName": "Muskelkonsultation"
+    },
+    "insculpt-kampanj": {
+      "bokadirektServiceId": "7ac21dc5-6aad-4fbd-8f51-c5387fa00b7d",
+      "bokadirektServiceName": "Insculpt - KAMPANJ"
+    },
+    "insculpt-45": {
+      "bokadirektServiceId": "8e2f6de5-c3ea-4de1-b24a-b277b7ef9035",
+      "bokadirektServiceName": "Insculpt"
+    },
+    "insculpt-10kort": {
+      "bokadirektServiceId": "e64f6955-52eb-43f4-85ad-1e693025cdef",
+      "bokadirektServiceName": "Insculpt 10 behandligar"
+    },
+    "insculpt-chair-kampanj": {
+      "bokadirektServiceId": "d274aecf-3e9b-4065-a7da-1a11b81fef30",
+      "bokadirektServiceName": "Insculpt Chair - KAMPANJ"
+    },
+    "insculpt-chair": {
+      "bokadirektServiceId": "509f2259-c302-4170-ba3d-84fb86002d50",
+      "bokadirektServiceName": "Insculpt Chair"
+    }
   }
 }

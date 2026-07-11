@@ -103,6 +103,10 @@ interface FamilyMapping {
 interface MappingFile {
   families: Record<string, FamilyMapping>;
   resources: Record<string, ResourceMapping>;
+  serviceMap: Record<
+    string,
+    { bokadirektServiceId: string; bokadirektServiceName: string }
+  >;
 }
 
 const typedMapping = mapping as MappingFile;
@@ -185,6 +189,59 @@ export async function getAvailableSlots(
   }));
 
   return { date, slots };
+}
+
+// ============================================
+// Bokadirekt lookup helpers (for enriching business email)
+// ============================================
+
+export function getBokadirektServiceInfo(ourServiceId: string) {
+  return typedMapping.serviceMap[ourServiceId] ?? null;
+}
+
+/**
+ * Suggest which capable resources are free for a specific service at a
+ * specific date+time. Returns resource display names in the order most
+ * likely to be assigned (first: the primary resource for that family).
+ */
+export async function suggestAvailableResources(
+  date: string,
+  time: string,
+  ourServiceId: string
+): Promise<string[]> {
+  const svcLookup = getServiceById(ourServiceId);
+  if (!svcLookup) return [];
+  const { service } = svcLookup;
+
+  const familyId = findFamilyForService(ourServiceId);
+  if (!familyId) return [];
+
+  const family = typedMapping.families[familyId];
+  if (!family) return [];
+
+  const startMin = parseHm(time);
+  const endMin = startMin + service.duration;
+  const target: [number, number] = [startMin, endMin];
+
+  const allBookings = await fetchBookingsForDate(date);
+  const bookingsByResource = new Map<string, RawBooking[]>();
+  for (const b of allBookings) {
+    const arr = bookingsByResource.get(b.resourceId) ?? [];
+    arr.push(b);
+    bookingsByResource.set(b.resourceId, arr);
+  }
+
+  const free: string[] = [];
+  for (const rid of family.bokadirektResourceIds) {
+    const res = typedMapping.resources[rid];
+    if (!res) continue;
+    const busy = (bookingsByResource.get(rid) ?? []).map(bookingInterval);
+    const conflict = busy.some((b) => overlaps(target, b));
+    if (!conflict) {
+      free.push(res.nickname || res.name);
+    }
+  }
+  return free;
 }
 
 // ============================================

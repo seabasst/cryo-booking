@@ -23,6 +23,11 @@ export interface BookingEmailData {
   customerPhone: string;
 }
 
+export interface BokadirektHint {
+  serviceName: string; // exact name in Bokadirekt
+  suggestedResources: string[]; // resource names free at that time
+}
+
 const FROM_ADDRESS =
   process.env.EMAIL_FROM || "FSA Workouts <onboarding@resend.dev>";
 const BUSINESS_EMAIL = process.env.BUSINESS_EMAIL || "info@fsaworkouts.se";
@@ -95,8 +100,34 @@ export async function sendCustomerConfirmation(data: BookingEmailData) {
 // ============================================
 // Business Notification Email
 // ============================================
-export async function sendBusinessNotification(data: BookingEmailData) {
+export async function sendBusinessNotification(
+  data: BookingEmailData,
+  bokadirekt?: BokadirektHint
+) {
   const resend = getResend();
+
+  const bdName = bokadirekt?.serviceName ?? data.serviceName;
+  const suggestedText =
+    bokadirekt && bokadirekt.suggestedResources.length > 0
+      ? bokadirekt.suggestedResources.join(" eller ")
+      : "";
+
+  const bokadirektBlock = bokadirekt
+    ? `
+        <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 16px 18px; margin-bottom: 20px;">
+          <p style="margin: 0 0 8px; font-weight: 600; color: #166534; font-size: 14px;">Så här matar du in i Bokadirekt</p>
+          <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+            <tr><td style="padding: 4px 0; color: #4b5563; width: 40%;">Tjänst i Bokadirekt</td><td style="padding: 4px 0; font-weight: 600;">${bdName}</td></tr>
+            ${
+              suggestedText
+                ? `<tr><td style="padding: 4px 0; color: #4b5563;">Föreslagen resurs</td><td style="padding: 4px 0; font-weight: 600;">${suggestedText}</td></tr>`
+                : ""
+            }
+          </table>
+          <a href="https://business.bokadirekt.se/" style="display: inline-block; margin-top: 12px; padding: 8px 14px; background: #16a34a; color: #fff; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: 600;">Öppna Bokadirekt →</a>
+        </div>
+    `
+    : "";
 
   const html = `
     <!DOCTYPE html>
@@ -105,7 +136,9 @@ export async function sendBusinessNotification(data: BookingEmailData) {
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #111; margin: 0; padding: 40px 20px;">
       <div style="max-width: 560px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 32px;">
         <h2 style="margin: 0 0 8px; color: #22c55e;">Ny bokning – blocka i Bokadirekt</h2>
-        <p style="margin: 0 0 24px; color: #666;">En kund har betalat för en behandling. Blocka denna tid i er Bokadirekt-kalender.</p>
+        <p style="margin: 0 0 24px; color: #666;">En kund har betalat för en behandling. Lägg in denna bokning i er Bokadirekt-kalender.</p>
+
+        ${bokadirektBlock}
 
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
           <tr><td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666;">Behandling</td><td style="padding: 10px 0; border-bottom: 1px solid #eee; text-align: right; font-weight: 600;">${data.serviceName}</td></tr>
@@ -130,7 +163,7 @@ export async function sendBusinessNotification(data: BookingEmailData) {
     from: FROM_ADDRESS,
     to: BUSINESS_EMAIL,
     replyTo: data.customerEmail,
-    subject: `Ny bokning: ${data.serviceName} ${formatDate(data.date)} kl ${data.time}`,
+    subject: `Ny bokning: ${bdName} ${formatDate(data.date)} kl ${data.time}`,
     html,
   });
 }

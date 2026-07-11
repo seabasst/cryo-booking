@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { constructWebhookEvent } from "@/lib/stripe";
-import { createBooking } from "@/lib/bokadirekt";
+import {
+  createBooking,
+  getBokadirektServiceInfo,
+  suggestAvailableResources,
+} from "@/lib/bokadirekt";
 import {
   sendCustomerConfirmation,
   sendBusinessNotification,
+  type BokadirektHint,
 } from "@/lib/email";
 import { sendCustomerSms } from "@/lib/sms";
 import Stripe from "stripe";
@@ -67,9 +72,28 @@ export async function POST(request: NextRequest) {
           console.error("Error creating booking:", bookingError);
         }
 
+        // Look up Bokadirekt hint (service name + suggested resource)
+        let bokadirektHint: BokadirektHint | undefined;
+        try {
+          const info = getBokadirektServiceInfo(bookingData.serviceId);
+          const resources = await suggestAvailableResources(
+            bookingData.date,
+            bookingData.time,
+            bookingData.serviceId
+          );
+          if (info) {
+            bokadirektHint = {
+              serviceName: info.bokadirektServiceName,
+              suggestedResources: resources,
+            };
+          }
+        } catch (hintError) {
+          console.error("Bokadirekt hint lookup failed:", hintError);
+        }
+
         const notificationResults = await Promise.allSettled([
           sendCustomerConfirmation(bookingData),
-          sendBusinessNotification(bookingData),
+          sendBusinessNotification(bookingData, bokadirektHint),
           sendCustomerSms(bookingData),
         ]);
 
