@@ -1,0 +1,254 @@
+{
+  "families": {
+    "kryoterapi": {
+      "bokadirektFamilyId": "kryoterapi",
+      "bokadirektServiceIds": [
+        "64926918-ce06-494c-aa65-2e584c0fb78a",
+        "6d8f8631-ee5d-4832-9b40-14666cb6c000",
+        "b2a94343-12e6-4eca-acbc-9acc2878ceae",
+        "58c90b69-c449-4b20-a147-fc555a9be1db",
+        "5ac6ab79-1944-40ea-b765-93f16d34311e",
+        "b928a429-2c5d-4167-8d4c-280403c3437e",
+        "a65bf3d2-c44a-4a02-89bd-64e76f4b143e"
+      ],
+      "bokadirektResourceIds": [
+        "352dd11a-521f-4145-b5e1-218731b97039"
+      ]
+    },
+    "rodljus": {
+      "bokadirektFamilyId": "rodljus",
+      "bokadirektServiceIds": [
+        "8a833599-6c00-431e-925c-6cc9de879a28",
+        "b92d80b3-42a1-414e-971d-a3b7b2ed8d7c"
+      ],
+      "bokadirektResourceIds": [
+        "79c01546-ca95-4c92-ab33-a5822ec07808"
+      ]
+    },
+    "kompression": {
+      "bokadirektFamilyId": "kompression",
+      "bokadirektServiceIds": [
+        "78f43b8a-628c-4bcf-a415-37847d127f46"
+      ],
+      "bokadirektResourceIds": [
+        "128c81ed-153f-4d28-8ad3-6d1b630b2c0c"
+      ]
+    },
+    "insculpt-chair": {
+      "bokadirektFamilyId": "insculpt-chair",
+      "bokadirektServiceIds": [
+        "509f2259-c302-4170-ba3d-84fb86002d50",
+        "d274aecf-3e9b-4065-a7da-1a11b81fef30"
+      ],
+      "bokadirektResourceIds": [
+        "79c01546-ca95-4c92-ab33-a5822ec07808"
+      ]
+    },
+    "massage": {
+      "bokadirektFamilyId": "massage",
+      "bokadirektServiceIds": [
+        "2adf81d7-7375-4014-983c-1bfb11d7608f",
+        "bceaf14a-af74-43a1-b5a6-0728a9199544",
+        "d7d9190f-0564-452d-b84f-591e13cc9782",
+        "c8b8c34b-3481-47a0-aa45-4231bbf1978e",
+        "7f3424f2-20ac-465c-b3a4-374090a64f13",
+        "858ce8cc-0b56-477c-abd5-0d6ae1d729f1",
+        "119e5430-e323-4bfd-a7b5-11e8e38d1771",
+        "65f93df5-1cdb-454e-9294-28a0512bbea3",
+        "b9b3382c-7500-441f-b095-84664f0e0a35",
+        "aa1c4375-f291-4e49-854f-42606eca6867",
+        "86efef83-73bc-4bf2-8438-9942ce221ac2",
+        "54853360-1808-43e6-a024-44b85e7a4d43",
+        "ca0c5bc4-978c-46cf-afce-1d6df5f89c6b",
+        "3785a750-f6e9-4510-98e8-d864deb2bde4",
+        "6c909561-4b87-4644-9e8d-c4a084a36728",
+        "ae692e29-f072-45dc-a46d-0afe5ab7ff72",
+        "c1411235-4e63-4ceb-a1a6-e7fc2ec3017e",
+        "7ed84ec8-b0f6-4a92-b73a-72a6fb97c548",
+        "f70f09f0-b7c8-4a30-b479-dfd8c94aa184"
+      ],
+      "bokadirektResourceIds": [
+        "b2383330-3c29-4d24-9023-f3f2b6736275",
+        "e27b7faf-f481-4f1f-9fee-2318c4d0d459"
+      ]
+    },
+    "insculpt": {
+      "bokadirektFamilyId": "insculpt",
+      "bokadirektServiceIds": [
+        "8e2f6de5-c3ea-4de1-b24a-b277b7ef9035",
+        "026d3d78-b903-40ed-8abe-788500adbf37",
+        "7ac21dc5-6aad-4fbd-8f51-c5387fa00b7d",
+        "e64f6955-52eb-43f4-85ad-1e693025cdef",
+        "01617ac3-49e9-465d-a9e5-7f36879d9640"
+      ],
+      "bokadirektResourceIds": [
+        "e27b7faf-f481-4f1f-9fee-2318c4d0d459",
+        "b2383330-3c29-4d24-9023-f3f2b6736275"
+      ]
+    }
+  },
+  "resources": {
+    "352dd11a-521f-4145-b5e1-218731b97039": {
+      "name": "FSA Recovery Kryokammare",
+      "nickname": "FSA Recovery",
+      "bookableOnline": true,
+      "hoursByWeekday": {
+        "wed": {
+          "open": "08:30",
+          "close": "19:00"
+        },
+        "sun": {
+          "open": "10:00",
+          "close": "18:30"
+        },
+        "tue": {
+          "open": "09:00",
+          "close": "19:30"
+        },
+        "sat": {
+          "open": "10:00",
+          "close": "16:00"
+        },
+        "thu": {
+          "open": "09:00",
+          "close": "19:00"
+        },
+        "fri": {
+          "open": "09:00",
+          "close": "19:00"
+        },
+        "mon": {
+          "open": "08:00",
+          "close": "18:30"
+        }
+      }
+    },
+    "e27b7faf-f481-4f1f-9fee-2318c4d0d459": {
+      "name": "Hassan Ala-Eddin",
+      "nickname": "Hassan",
+      "bookableOnline": true,
+      "hoursByWeekday": {
+        "wed": {
+          "open": "09:00",
+          "close": "16:00"
+        },
+        "tue": {
+          "open": "09:00",
+          "close": "19:30"
+        },
+        "mon": {
+          "open": "09:00",
+          "close": "16:00"
+        },
+        "fri": {
+          "open": "09:00",
+          "close": "20:30"
+        },
+        "sat": {
+          "open": "10:00",
+          "close": "16:30"
+        },
+        "thu": {
+          "open": "09:00",
+          "close": "16:30"
+        }
+      }
+    },
+    "dec88730-d0c2-4ab4-9024-47c0144f7cbd": {
+      "name": "InBody Mätning",
+      "nickname": "InBody",
+      "bookableOnline": true,
+      "hoursByWeekday": {
+        "tue": {
+          "open": "11:00",
+          "close": "18:30"
+        }
+      }
+    },
+    "b2383330-3c29-4d24-9023-f3f2b6736275": {
+      "name": "Linnéa Sundberg",
+      "nickname": "Linnea",
+      "bookableOnline": true,
+      "hoursByWeekday": {
+        "tue": {
+          "open": "12:00",
+          "close": "20:30"
+        },
+        "sun": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "wed": {
+          "open": "12:00",
+          "close": "20:30"
+        },
+        "thu": {
+          "open": "11:00",
+          "close": "20:00"
+        },
+        "mon": {
+          "open": "14:00",
+          "close": "20:00"
+        }
+      }
+    },
+    "128c81ed-153f-4d28-8ad3-6d1b630b2c0c": {
+      "name": "Recovery Återhämtningsbyxor",
+      "nickname": "Återhämtningsbyxor",
+      "bookableOnline": true,
+      "hoursByWeekday": {
+        "tue": {
+          "open": "10:30",
+          "close": "20:30"
+        },
+        "wed": {
+          "open": "11:30",
+          "close": "20:00"
+        },
+        "sat": {
+          "open": "11:00",
+          "close": "14:00"
+        },
+        "sun": {
+          "open": "12:00",
+          "close": "18:00"
+        }
+      }
+    },
+    "79c01546-ca95-4c92-ab33-a5822ec07808": {
+      "name": "Rödljus terapi + Insculpt Chair Recovery",
+      "nickname": "Rödljus terapi",
+      "bookableOnline": true,
+      "hoursByWeekday": {
+        "wed": {
+          "open": "08:00",
+          "close": "21:00"
+        },
+        "tue": {
+          "open": "08:00",
+          "close": "20:00"
+        },
+        "thu": {
+          "open": "08:00",
+          "close": "20:00"
+        },
+        "fri": {
+          "open": "08:30",
+          "close": "20:00"
+        },
+        "sun": {
+          "open": "10:00",
+          "close": "17:30"
+        },
+        "sat": {
+          "open": "10:00",
+          "close": "16:00"
+        },
+        "mon": {
+          "open": "08:00",
+          "close": "20:30"
+        }
+      }
+    }
+  }
+}

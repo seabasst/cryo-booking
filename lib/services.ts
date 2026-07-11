@@ -54,13 +54,6 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
         description:
           "Kompressionsbyxor – boostar återhämtningen, blodcirkulationen och tar bort slaggprodukter",
       },
-      {
-        id: "compression-10kort",
-        name: "Compression Therapy 10-kort",
-        duration: 20,
-        price: 1000,
-        description: "10 behandlingar",
-      },
     ],
   },
   {
@@ -235,12 +228,6 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
         price: 1300,
         description: "Bäckenbottenträning",
       },
-      {
-        id: "insculpt-chair-10kort",
-        name: "Insculpt Chair 10 behandlingar",
-        duration: 40,
-        price: 6500,
-      },
     ],
   },
   {
@@ -310,11 +297,8 @@ export const TREATMENT_FAMILIES: TreatmentFamily[] = [
       "https://images.squarespace-cdn.com/content/v1/66def6493457365fcadf9c12/e56f38ad-18d1-408c-b954-959cd1ee6c0b/fsa.jpg",
     description:
       "Kompressionsbyxor som boostar återhämtningen, blodcirkulationen och tar bort slaggprodukter. Vanlig behandling efter match eller hård träning.",
-    priceTiers: [
-      { label: "1x", price: 200 },
-      { label: "10-kort", price: 1000 },
-    ],
-    serviceIds: ["recovery-ultimate", "compression-10kort"],
+    priceTiers: [{ label: "1x", price: 200 }],
+    serviceIds: ["recovery-ultimate"],
   },
   {
     id: "insculpt-chair",
@@ -326,13 +310,8 @@ export const TREATMENT_FAMILIES: TreatmentFamily[] = [
     priceTiers: [
       { label: "Kampanj", price: 499, highlight: true },
       { label: "1x", price: 1300 },
-      { label: "10-kort", price: 6500 },
     ],
-    serviceIds: [
-      "insculpt-chair-kampanj",
-      "insculpt-chair",
-      "insculpt-chair-10kort",
-    ],
+    serviceIds: ["insculpt-chair-kampanj", "insculpt-chair"],
   },
   {
     id: "massage",

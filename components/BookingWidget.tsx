@@ -249,6 +249,7 @@ export default function BookingWidget({ cancelled }: BookingWidgetProps) {
                   <TimeSlots
                     selectedDate={selectedDate}
                     selectedSlot={selectedSlot}
+                    serviceId={selectedService.id}
                     onSlotSelect={handleSlotSelect}
                   />
                 )}

@@ -6,12 +6,14 @@ import type { TimeSlot } from "@/lib/types";
 interface TimeSlotsProps {
   selectedDate: string;
   selectedSlot: TimeSlot | null;
+  serviceId: string;
   onSlotSelect: (slot: TimeSlot) => void;
 }
 
 export default function TimeSlots({
   selectedDate,
   selectedSlot,
+  serviceId,
   onSlotSelect,
 }: TimeSlotsProps) {
   const [slots, setSlots] = useState<TimeSlot[]>([]);
@@ -22,7 +24,7 @@ export default function TimeSlots({
       setIsLoading(true);
       try {
         const response = await fetch(
-          `/api/available-slots?date=${selectedDate}`
+          `/api/available-slots?date=${selectedDate}&serviceId=${encodeURIComponent(serviceId)}`
         );
         const data = await response.json();
         setSlots(data.slots);
@@ -34,10 +36,10 @@ export default function TimeSlots({
       }
     }
 
-    if (selectedDate) {
+    if (selectedDate && serviceId) {
       fetchSlots();
     }
-  }, [selectedDate]);
+  }, [selectedDate, serviceId]);
 
   if (isLoading) {
     return (
