@@ -23,6 +23,7 @@ export default function OrderSummary({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -35,6 +36,10 @@ export default function OrderSummary({
   };
 
   const handlePayment = async () => {
+    if (!termsAccepted) {
+      setError("Du måste godkänna köpvillkoren för att gå vidare.");
+      return;
+    }
     setIsLoading(true);
     setError(null);
 
@@ -167,12 +172,43 @@ export default function OrderSummary({
       </div>
 
       {/* Total */}
-      <div className="flex justify-between items-center py-4 border-t border-fsa-gray-light mb-6">
+      <div className="flex justify-between items-center py-4 border-t border-fsa-gray-light mb-4">
         <span className="text-fsa-text font-medium">Totalt att betala</span>
         <span className="text-2xl font-bold text-fsa-red">
           {selectedService.price.toLocaleString("sv-SE")} kr
         </span>
       </div>
+
+      {/* Terms checkbox */}
+      <label className="flex items-start gap-3 mb-4 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={termsAccepted}
+          onChange={(e) => setTermsAccepted(e.target.checked)}
+          className="mt-0.5 w-4 h-4 accent-fsa-red shrink-0"
+        />
+        <span className="text-sm text-fsa-text-muted leading-relaxed">
+          Jag godkänner{" "}
+          <a
+            href="/villkor"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-fsa-red hover:underline"
+          >
+            köpvillkoren
+          </a>{" "}
+          och har läst{" "}
+          <a
+            href="/integritet"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-fsa-red hover:underline"
+          >
+            integritetspolicyn
+          </a>
+          .
+        </span>
+      </label>
 
       {/* Error Message */}
       {error && (

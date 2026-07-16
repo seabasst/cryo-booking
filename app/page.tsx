@@ -25,7 +25,22 @@ export default async function Home({ searchParams }: PageProps) {
         <BookingWidget cancelled={cancelled} />
 
         {/* Footer */}
-        <footer className="mt-16 text-center text-fsa-text-dim text-xs">
+        <footer className="mt-16 text-center text-fsa-text-dim text-xs space-y-2">
+          <div className="flex justify-center gap-4">
+            <a
+              href="/villkor"
+              className="hover:text-fsa-red transition-colors"
+            >
+              Köpvillkor
+            </a>
+            <span aria-hidden="true">·</span>
+            <a
+              href="/integritet"
+              className="hover:text-fsa-red transition-colors"
+            >
+              Integritetspolicy
+            </a>
+          </div>
           <p>&copy; {new Date().getFullYear()} FSA Workouts HQ</p>
         </footer>
       </div>
