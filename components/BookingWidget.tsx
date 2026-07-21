@@ -243,6 +243,7 @@ export default function BookingWidget({ cancelled }: BookingWidgetProps) {
                 </h2>
                 <DatePicker
                   selectedDate={selectedDate}
+                  serviceId={selectedService.id}
                   onDateSelect={handleDateSelect}
                 />
                 {selectedDate && (

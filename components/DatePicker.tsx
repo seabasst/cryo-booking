@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { getOpenWeekdaysForService } from "@/lib/services";
 
 interface DatePickerProps {
   selectedDate: string | null;
+  serviceId: string;
   onDateSelect: (date: string) => void;
 }
 
@@ -48,10 +50,17 @@ function isSameDay(a: Date, b: Date): boolean {
   );
 }
 
+const WEEKDAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+
 export default function DatePicker({
   selectedDate,
+  serviceId,
   onDateSelect,
 }: DatePickerProps) {
+  const openWeekdays = useMemo(
+    () => getOpenWeekdaysForService(serviceId),
+    [serviceId]
+  );
   const today = useMemo(() => startOfDay(new Date()), []);
   const maxDate = useMemo(() => {
     // Allow up to last day of (today.month + MAX_MONTHS_AHEAD)
@@ -185,7 +194,9 @@ export default function DatePicker({
           }
           const isPast = cell.date < today;
           const isFuture = cell.date > maxDate;
-          const isDisabled = isPast || isFuture;
+          const weekdayKey = WEEKDAY_KEYS[(cell.date.getDay() + 6) % 7];
+          const isClosed = openWeekdays.size > 0 && !openWeekdays.has(weekdayKey);
+          const isDisabled = isPast || isFuture || isClosed;
           const isToday = isSameDay(cell.date, today);
           const isSelected = selectedDate === cell.ymd;
 
@@ -195,12 +206,17 @@ export default function DatePicker({
               type="button"
               onClick={() => !isDisabled && onDateSelect(cell.ymd!)}
               disabled={isDisabled}
+              aria-label={
+                isClosed ? `${cell.ymd} — stängt` : cell.ymd || undefined
+              }
               className={`
                 aspect-square rounded-lg text-sm sm:text-base font-medium
                 transition-all duration-150 relative
                 ${
                   isSelected
                     ? "bg-fsa-red text-white shadow-lg shadow-fsa-red/30 scale-105"
+                    : isClosed && !isPast && !isFuture
+                    ? "text-fsa-text-dim/60 line-through cursor-not-allowed bg-fsa-dark/40"
                     : isDisabled
                     ? "text-fsa-text-dim/50 cursor-not-allowed"
                     : "text-fsa-text hover:bg-fsa-gray hover:scale-105"
@@ -219,7 +235,7 @@ export default function DatePicker({
       </div>
 
       <p className="text-[11px] text-fsa-text-dim mt-4 text-center">
-        Boka upp till 2 månader framåt
+        Stängda dagar är överstrukna — boka upp till 2 månader framåt
       </p>
     </div>
   );

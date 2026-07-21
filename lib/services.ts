@@ -1,4 +1,5 @@
 import type { Service, ServiceCategory, TreatmentFamily } from "./types";
+import bokadirektMapping from "./bokadirekt-mapping.json";
 
 // ============================================
 // FSA Workouts HQ - Behandlingar
@@ -380,6 +381,40 @@ export function getServicesForFamily(familyId: string): Service[] {
     }
   }
   return all;
+}
+
+/**
+ * Returns weekday keys ("mon"..."sun") when at least one capable resource
+ * has working hours for the given family. Uses the mapping derived from
+ * Bokadirekt history — good enough to grey out days in the calendar.
+ */
+export function getOpenWeekdaysForFamily(familyId: string): Set<string> {
+  const open = new Set<string>();
+  const mapping = bokadirektMapping as {
+    families: Record<string, { bokadirektResourceIds: string[] }>;
+    resources: Record<
+      string,
+      { hoursByWeekday: Record<string, unknown>; bookableOnline?: boolean }
+    >;
+  };
+  const family = mapping.families[familyId];
+  if (!family) return open;
+  for (const rid of family.bokadirektResourceIds) {
+    const res = mapping.resources[rid];
+    if (!res) continue;
+    if (res.bookableOnline === false) continue;
+    for (const day of Object.keys(res.hoursByWeekday)) open.add(day);
+  }
+  return open;
+}
+
+export function getOpenWeekdaysForService(serviceId: string): Set<string> {
+  for (const family of TREATMENT_FAMILIES) {
+    if (family.serviceIds.includes(serviceId)) {
+      return getOpenWeekdaysForFamily(family.id);
+    }
+  }
+  return new Set();
 }
 
 // ============================================
