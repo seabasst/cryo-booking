@@ -287,15 +287,28 @@ export async function getOpenDaysForService(
 
   const resources = await fetchResourceAvailability(startDate, endDate);
 
-  const byDate: Record<string, boolean> = {};
+  // Build set of dates where at least one capable resource has capacity
+  const openDates = new Set<string>();
   for (const r of resources) {
     if (!capableResourceIds.has(r.resourceId)) continue;
     if (!r.bookableOnline) continue;
     for (const a of r.availabilities ?? []) {
-      const ymd = a.date.slice(0, 10);
-      if (a.bookableMinutes > 0) byDate[ymd] = true;
-      else if (!(ymd in byDate)) byDate[ymd] = false;
+      if (a.bookableMinutes > 0) openDates.add(a.date.slice(0, 10));
     }
+  }
+
+  // Iterate every date in the requested range — dates without an entry
+  // are treated as closed (resource not scheduled that day)
+  const byDate: Record<string, boolean> = {};
+  const start = new Date(`${startDate}T00:00:00Z`);
+  const end = new Date(`${endDate}T00:00:00Z`);
+  for (
+    let d = new Date(start);
+    d.getTime() <= end.getTime();
+    d.setUTCDate(d.getUTCDate() + 1)
+  ) {
+    const ymd = d.toISOString().slice(0, 10);
+    byDate[ymd] = openDates.has(ymd);
   }
   return byDate;
 }
