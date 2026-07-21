@@ -24,6 +24,46 @@ interface RawBooking {
   cancelled: boolean;
 }
 
+interface RawAvailability {
+  date: string;
+  bookableMinutes: number;
+  bookedMinutes: number;
+  absenceMinutes: number;
+  lunchMinutes: number;
+  attendanceMinutes: number;
+}
+
+interface RawResource {
+  resourceId: string;
+  resourceName: string;
+  bookableOnline: boolean;
+  availabilities: RawAvailability[] | null;
+}
+
+async function fetchResourceAvailability(
+  startDate: string,
+  endDate: string
+): Promise<RawResource[]> {
+  const key = process.env.BOKADIREKT_API_KEY;
+  if (!key) return [];
+
+  // EndDate is exclusive too — add 1 day
+  const next = new Date(`${endDate}T00:00:00Z`);
+  next.setUTCDate(next.getUTCDate() + 1);
+  const endExclusive = next.toISOString().slice(0, 10);
+
+  const url = `${BASE_URL}/api/v1/resources?StartDate=${startDate}&EndDate=${endExclusive}`;
+  const res = await fetch(url, {
+    headers: { "X-API-Key": key },
+    next: { revalidate: 300 }, // 5 min cache — resource schedules change infrequently
+  });
+  if (!res.ok) {
+    console.error(`Bokadirekt resources fetch failed: ${res.status}`);
+    return [];
+  }
+  return (await res.json()) as RawResource[];
+}
+
 async function fetchBookingsForDate(date: string): Promise<RawBooking[]> {
   const key = process.env.BOKADIREKT_API_KEY;
   if (!key) {
@@ -146,15 +186,32 @@ export async function getAvailableSlots(
   const jsDay = new Date(`${date}T12:00:00`).getDay(); // 0=Sun..6=Sat
   const weekday = WEEKDAYS[(jsDay + 6) % 7]; // shift to Mon=0..Sun=6
 
-  // Fetch all bookings for the date once
-  const allBookings = await fetchBookingsForDate(date);
+  // Fetch bookings + resource availability for the date in parallel
+  const [allBookings, resources] = await Promise.all([
+    fetchBookingsForDate(date),
+    fetchResourceAvailability(date, date),
+  ]);
 
-  // Group by resource
+  // Group bookings by resource
   const bookingsByResource = new Map<string, RawBooking[]>();
   for (const b of allBookings) {
     const arr = bookingsByResource.get(b.resourceId) ?? [];
     arr.push(b);
     bookingsByResource.set(b.resourceId, arr);
+  }
+
+  // Determine which capable resources actually have capacity on this date
+  // (bookableMinutes > 0 means not on vacation/sick/fully absent)
+  const capableWithCapacity = new Set<string>();
+  for (const r of resources) {
+    if (!family.bokadirektResourceIds.includes(r.resourceId)) continue;
+    if (!r.bookableOnline) continue;
+    const availability = r.availabilities?.find(
+      (a) => a.date.slice(0, 10) === date
+    );
+    if (availability && availability.bookableMinutes > 0) {
+      capableWithCapacity.add(r.resourceId);
+    }
   }
 
   const duration = service.duration;
@@ -164,6 +221,8 @@ export async function getAvailableSlots(
   const timeState = new Map<string, { withinHours: boolean; anyFree: boolean }>();
 
   for (const rid of family.bokadirektResourceIds) {
+    if (!capableWithCapacity.has(rid)) continue; // skip vacation/sick/closed
+
     const res = typedMapping.resources[rid];
     if (!res || !res.bookableOnline) continue;
 
@@ -202,6 +261,43 @@ export async function getAvailableSlots(
     }));
 
   return { date, slots };
+}
+
+// ============================================
+// Availability by date range (for calendar)
+// ============================================
+
+/**
+ * For a given service and date range, return which dates have at least one
+ * capable resource with bookableMinutes > 0 (i.e. not on vacation/sick).
+ * Returns { "2026-07-14": true, "2026-07-15": false, ... }
+ */
+export async function getOpenDaysForService(
+  serviceId: string,
+  startDate: string,
+  endDate: string
+): Promise<Record<string, boolean>> {
+  const familyId = findFamilyForService(serviceId);
+  if (!familyId) return {};
+
+  const family = typedMapping.families[familyId];
+  if (!family) return {};
+
+  const capableResourceIds = new Set(family.bokadirektResourceIds);
+
+  const resources = await fetchResourceAvailability(startDate, endDate);
+
+  const byDate: Record<string, boolean> = {};
+  for (const r of resources) {
+    if (!capableResourceIds.has(r.resourceId)) continue;
+    if (!r.bookableOnline) continue;
+    for (const a of r.availabilities ?? []) {
+      const ymd = a.date.slice(0, 10);
+      if (a.bookableMinutes > 0) byDate[ymd] = true;
+      else if (!(ymd in byDate)) byDate[ymd] = false;
+    }
+  }
+  return byDate;
 }
 
 // ============================================

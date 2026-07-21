@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { getOpenWeekdaysForService } from "@/lib/services";
+import { useEffect, useMemo, useState } from "react";
 
 interface DatePickerProps {
   selectedDate: string | null;
@@ -50,18 +49,39 @@ function isSameDay(a: Date, b: Date): boolean {
   );
 }
 
-const WEEKDAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
-
 export default function DatePicker({
   selectedDate,
   serviceId,
   onDateSelect,
 }: DatePickerProps) {
-  const openWeekdays = useMemo(
-    () => getOpenWeekdaysForService(serviceId),
-    [serviceId]
-  );
   const today = useMemo(() => startOfDay(new Date()), []);
+  const [openByDate, setOpenByDate] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    async function loadOpenDays() {
+      const from = formatYmd(today);
+      const twoMonthsAhead = addMonths(today, 2);
+      const lastDay = new Date(
+        twoMonthsAhead.getFullYear(),
+        twoMonthsAhead.getMonth() + 1,
+        0
+      );
+      const to = formatYmd(lastDay);
+      try {
+        const res = await fetch(
+          `/api/available-days?serviceId=${encodeURIComponent(
+            serviceId
+          )}&from=${from}&to=${to}`
+        );
+        const data = await res.json();
+        if (data.openByDate) setOpenByDate(data.openByDate);
+      } catch (err) {
+        console.error("Failed to load available days:", err);
+      }
+    }
+    if (serviceId) loadOpenDays();
+  }, [serviceId, today]);
+
   const maxDate = useMemo(() => {
     // Allow up to last day of (today.month + MAX_MONTHS_AHEAD)
     const lastMonthStart = addMonths(today, MAX_MONTHS_AHEAD);
@@ -194,8 +214,11 @@ export default function DatePicker({
           }
           const isPast = cell.date < today;
           const isFuture = cell.date > maxDate;
-          const weekdayKey = WEEKDAY_KEYS[(cell.date.getDay() + 6) % 7];
-          const isClosed = openWeekdays.size > 0 && !openWeekdays.has(weekdayKey);
+          // If we haven't loaded the availability map yet (empty), keep day
+          // enabled — the /available-slots call will still show "0 tider" if
+          // truly closed. Once loaded, `false` = confirmed closed.
+          const isClosed =
+            cell.ymd in openByDate && openByDate[cell.ymd] === false;
           const isDisabled = isPast || isFuture || isClosed;
           const isToday = isSameDay(cell.date, today);
           const isSelected = selectedDate === cell.ymd;
