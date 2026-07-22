@@ -11,6 +11,7 @@ import {
   type BokadirektHint,
 } from "@/lib/email";
 import { sendCustomerSms } from "@/lib/sms";
+import { sendBookingSlackNotification } from "@/lib/slack";
 import Stripe from "stripe";
 
 // Disable body parsing for webhook route
@@ -95,9 +96,12 @@ export async function POST(request: NextRequest) {
           sendCustomerConfirmation(bookingData),
           sendBusinessNotification(bookingData, bokadirektHint),
           sendCustomerSms(bookingData),
+          process.env.SLACK_WEBHOOK_URL
+            ? sendBookingSlackNotification(bookingData, bokadirektHint)
+            : Promise.resolve({ ok: true, skipped: true }),
         ]);
 
-        const labels = ["customer email", "business email", "customer sms"];
+        const labels = ["customer email", "business email", "customer sms", "slack"];
         notificationResults.forEach((result, i) => {
           if (result.status === "fulfilled") {
             console.log(`✅ Sent ${labels[i]}`);
