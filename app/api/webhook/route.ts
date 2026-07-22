@@ -12,6 +12,7 @@ import {
 } from "@/lib/email";
 import { sendCustomerSms } from "@/lib/sms";
 import { sendBookingSlackNotification } from "@/lib/slack";
+import { logBookingToSheet } from "@/lib/sheets";
 import Stripe from "stripe";
 
 // Disable body parsing for webhook route
@@ -99,9 +100,18 @@ export async function POST(request: NextRequest) {
           process.env.SLACK_WEBHOOK_URL
             ? sendBookingSlackNotification(bookingData, bokadirektHint)
             : Promise.resolve({ ok: true, skipped: true }),
+          process.env.GOOGLE_SHEETS_WEBHOOK_URL
+            ? logBookingToSheet(bookingData, bokadirektHint)
+            : Promise.resolve({ ok: true, skipped: true }),
         ]);
 
-        const labels = ["customer email", "business email", "customer sms", "slack"];
+        const labels = [
+          "customer email",
+          "business email",
+          "customer sms",
+          "slack",
+          "google sheet",
+        ];
         notificationResults.forEach((result, i) => {
           if (result.status === "fulfilled") {
             console.log(`✅ Sent ${labels[i]}`);
