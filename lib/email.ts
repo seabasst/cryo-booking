@@ -30,7 +30,14 @@ export interface BokadirektHint {
 
 const FROM_ADDRESS =
   process.env.EMAIL_FROM || "FSA Workouts <onboarding@resend.dev>";
-const BUSINESS_EMAIL = process.env.BUSINESS_EMAIL || "info@fsaworkouts.se";
+
+// BUSINESS_EMAIL supports a comma-separated list — trim & filter empties
+const BUSINESS_EMAILS: string[] = (
+  process.env.BUSINESS_EMAIL || "info@fsaworkouts.se"
+)
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -82,7 +89,7 @@ export async function sendCustomerConfirmation(data: BookingEmailData) {
             </ul>
           </div>
 
-          <p style="margin: 0; color: #808080; font-size: 13px;">Behöver du avboka eller ändra? Hör av dig till <a href="mailto:${BUSINESS_EMAIL}" style="color: #86efac;">${BUSINESS_EMAIL}</a>.</p>
+          <p style="margin: 0; color: #808080; font-size: 13px;">Behöver du avboka eller ändra? Hör av dig till <a href="mailto:${BUSINESS_EMAILS[0]}" style="color: #86efac;">${BUSINESS_EMAILS[0]}</a>.</p>
         </div>
       </div>
     </body>
@@ -161,7 +168,7 @@ export async function sendBusinessNotification(
 
   return resend.emails.send({
     from: FROM_ADDRESS,
-    to: BUSINESS_EMAIL,
+    to: BUSINESS_EMAILS,
     replyTo: data.customerEmail,
     subject: `Ny bokning: ${bdName} ${formatDate(data.date)} kl ${data.time}`,
     html,
