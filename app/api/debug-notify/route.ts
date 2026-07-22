@@ -73,18 +73,18 @@ export async function GET(request: NextRequest) {
       sendBusinessNotification(bookingData, bokadirektHint),
     ]);
 
-    function summarize(r: PromiseSettledResult<unknown>) {
+    const summarize = (r: PromiseSettledResult<unknown>) => {
       if (r.status === "fulfilled") {
         return { ok: true, response: r.value };
       }
-      const err = r.reason;
+      const err = r.reason as unknown;
       return {
         ok: false,
         errorMessage: err instanceof Error ? err.message : String(err),
         errorName: err instanceof Error ? err.name : undefined,
         stack: err instanceof Error ? err.stack?.split("\n").slice(0, 6) : undefined,
       };
-    }
+    };
 
     return NextResponse.json({
       bookingData,
