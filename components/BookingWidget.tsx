@@ -9,6 +9,7 @@ import type {
   TreatmentFamily,
 } from "@/lib/types";
 import { getServicesForFamily } from "@/lib/services";
+import { trackPixel } from "@/lib/pixel";
 import TreatmentGrid from "./TreatmentGrid";
 import VariantPicker from "./VariantPicker";
 import DatePicker from "./DatePicker";
@@ -40,6 +41,11 @@ export default function BookingWidget({ cancelled }: BookingWidgetProps) {
   }, [cancelled]);
 
   const handleFamilySelect = (family: TreatmentFamily) => {
+    trackPixel("ViewContent", {
+      content_category: family.name,
+      content_ids: [family.id],
+      content_type: "product_group",
+    });
     const services = getServicesForFamily(family.id);
     if (services.length === 1) {
       // Skip variant picker — go straight to date/time
@@ -54,6 +60,13 @@ export default function BookingWidget({ cancelled }: BookingWidgetProps) {
   };
 
   const handleVariantSelect = (service: Service) => {
+    trackPixel("ViewContent", {
+      content_ids: [service.id],
+      content_name: service.name,
+      content_type: "product",
+      value: service.price,
+      currency: "SEK",
+    });
     setSelectedService(service);
     setCurrentStep(2);
   };
@@ -80,6 +93,15 @@ export default function BookingWidget({ cancelled }: BookingWidgetProps) {
 
   const handleCustomerSubmit = (info: CustomerInfo) => {
     setCustomerInfo(info);
+    if (selectedService) {
+      trackPixel("InitiateCheckout", {
+        content_ids: [selectedService.id],
+        content_name: selectedService.name,
+        value: selectedService.price,
+        currency: "SEK",
+        num_items: 1,
+      });
+    }
     setCurrentStep(4);
   };
 

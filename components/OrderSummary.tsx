@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { CustomerInfo, TimeSlot, Service } from "@/lib/types";
 import EmbeddedCheckoutModal from "./EmbeddedCheckoutModal";
 import BackBar from "./BackBar";
+import { trackPixel } from "@/lib/pixel";
 
 interface OrderSummaryProps {
   selectedService: Service;
@@ -70,6 +71,12 @@ export default function OrderSummary({
       }
 
       if (data.clientSecret) {
+        trackPixel("AddPaymentInfo", {
+          content_ids: [selectedService.id],
+          content_name: selectedService.name,
+          value: selectedService.price,
+          currency: "SEK",
+        });
         setClientSecret(data.clientSecret);
         setIsLoading(false);
         return;

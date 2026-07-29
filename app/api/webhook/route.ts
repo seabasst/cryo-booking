@@ -13,6 +13,7 @@ import {
 import { sendCustomerSms } from "@/lib/sms";
 import { sendBookingSlackNotification } from "@/lib/slack";
 import { logBookingToSheet } from "@/lib/sheets";
+import { sendCapiPurchase } from "@/lib/meta-capi";
 import Stripe from "stripe";
 
 // Disable body parsing for webhook route
@@ -93,6 +94,9 @@ export async function POST(request: NextRequest) {
           console.error("Bokadirekt hint lookup failed:", hintError);
         }
 
+        const appUrl =
+          process.env.NEXT_PUBLIC_APP_URL || "https://boka.fsaworkouts.se";
+
         const notificationResults = await Promise.allSettled([
           sendCustomerConfirmation(bookingData),
           sendBusinessNotification(bookingData, bokadirektHint),
@@ -103,6 +107,17 @@ export async function POST(request: NextRequest) {
           process.env.GOOGLE_SHEETS_WEBHOOK_URL
             ? logBookingToSheet(bookingData, bokadirektHint)
             : Promise.resolve({ ok: true, skipped: true }),
+          sendCapiPurchase({
+            eventId: session.id, // dedup with pixel Purchase on tack page
+            eventSourceUrl: `${appUrl}/tack?session_id=${session.id}`,
+            value: bookingData.price,
+            currency: "SEK",
+            contentIds: [bookingData.serviceId],
+            contentName: bookingData.serviceName,
+            customerEmail: bookingData.customerEmail,
+            customerPhone: bookingData.customerPhone,
+            customerName: bookingData.customerName,
+          }),
         ]);
 
         const labels = [
@@ -111,6 +126,7 @@ export async function POST(request: NextRequest) {
           "customer sms",
           "slack",
           "google sheet",
+          "meta capi purchase",
         ];
         notificationResults.forEach((result, i) => {
           if (result.status === "fulfilled") {

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getCheckoutSession } from "@/lib/stripe";
+import PurchaseEvent from "@/components/PurchaseEvent";
 
 interface PageProps {
   searchParams: Promise<{ session_id?: string; demo?: string }>;
@@ -15,6 +16,7 @@ interface BookingDetails {
   customerEmail: string;
   paymentStatus: string;
   isDemo: boolean;
+  serviceId?: string;
 }
 
 export default async function TackPage({ searchParams }: PageProps) {
@@ -70,6 +72,7 @@ export default async function TackPage({ searchParams }: PageProps) {
           customerEmail: session.metadata.customerEmail || "",
           paymentStatus: session.payment_status || "unknown",
           isDemo: false,
+          serviceId: session.metadata.serviceId || "",
         };
       }
     } catch (error) {
@@ -91,6 +94,18 @@ export default async function TackPage({ searchParams }: PageProps) {
   return (
     <main className="min-h-screen py-8 px-4 flex items-center justify-center">
       <div className="w-full max-w-md">
+        {/* Meta Pixel: Purchase event (deduped with server-side CAPI via session_id) */}
+        {!bookingDetails.isDemo &&
+          sessionId &&
+          bookingDetails.paymentStatus === "paid" && (
+            <PurchaseEvent
+              eventId={sessionId}
+              value={bookingDetails.price}
+              contentId={bookingDetails.serviceId || ""}
+              contentName={bookingDetails.serviceName}
+            />
+          )}
+
         {/* Demo Banner */}
         {bookingDetails.isDemo && (
           <div className="mb-4 p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-yellow-200 text-sm text-center animate-fade-in">
