@@ -85,17 +85,22 @@ export default function RootLayout({
               function send() {
                 var h = Math.max(
                   document.body.scrollHeight,
-                  document.documentElement.scrollHeight
+                  document.body.offsetHeight,
+                  document.documentElement.scrollHeight,
+                  document.documentElement.offsetHeight
                 );
                 if (h === last) return;
                 last = h;
-                window.parent.postMessage({ type: 'fsa-booking-height', height: h }, '*');
+                var msg = { type: 'fsa-booking-height', height: h };
+                try { window.parent.postMessage(msg, '*'); } catch (_) {}
+                try { window.top.postMessage(msg, '*'); } catch (_) {}
+                console.log('[fsa-booking] posted height', h);
               }
               send();
               new ResizeObserver(send).observe(document.body);
               window.addEventListener('load', send);
-              // Belt & suspenders: first 3s in case observer misses layout shifts
-              var n = 0, iv = setInterval(function(){ send(); if (++n > 15) clearInterval(iv); }, 200);
+              // Keep polling every 500ms — cheap, catches lazy image loads etc.
+              setInterval(send, 500);
             })();
           `}
         </Script>
