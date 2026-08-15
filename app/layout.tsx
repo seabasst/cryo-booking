@@ -83,13 +83,19 @@ export default function RootLayout({
               if (window.parent === window) return;
               var last = 0;
               function send() {
-                var h = document.documentElement.scrollHeight;
+                var h = Math.max(
+                  document.body.scrollHeight,
+                  document.documentElement.scrollHeight
+                );
                 if (h === last) return;
                 last = h;
                 window.parent.postMessage({ type: 'fsa-booking-height', height: h }, '*');
               }
+              send();
               new ResizeObserver(send).observe(document.body);
               window.addEventListener('load', send);
+              // Belt & suspenders: first 3s in case observer misses layout shifts
+              var n = 0, iv = setInterval(function(){ send(); if (++n > 15) clearInterval(iv); }, 200);
             })();
           `}
         </Script>
