@@ -74,6 +74,25 @@ export default function RootLayout({
 
         {/* Main content */}
         <div className="relative z-10">{children}</div>
+
+        {/* Post body height to parent so iframe embed can auto-resize.
+            Squarespace snippet listens for {type:'fsa-booking-height', height}. */}
+        <Script id="iframe-autoresize" strategy="afterInteractive">
+          {`
+            (function() {
+              if (window.parent === window) return;
+              var last = 0;
+              function send() {
+                var h = document.documentElement.scrollHeight;
+                if (h === last) return;
+                last = h;
+                window.parent.postMessage({ type: 'fsa-booking-height', height: h }, '*');
+              }
+              new ResizeObserver(send).observe(document.body);
+              window.addEventListener('load', send);
+            })();
+          `}
+        </Script>
       </body>
     </html>
   );
