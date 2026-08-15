@@ -21,6 +21,7 @@ export interface BookingEmailData {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
+  fbclid?: string;
 }
 
 export interface BokadirektHint {

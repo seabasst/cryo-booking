@@ -61,6 +61,7 @@ export default function OrderSummary({
           customerName: customerInfo.name,
           customerEmail: customerInfo.email,
           customerPhone: customerInfo.phone,
+          fbclid: new URLSearchParams(window.location.search).get("fbclid") ?? "",
         }),
       });
 

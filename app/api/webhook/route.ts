@@ -66,6 +66,7 @@ export async function POST(request: NextRequest) {
           serviceName: metadata.serviceName,
           duration: parseInt(metadata.duration, 10),
           price: parseInt(metadata.price, 10),
+          fbclid: metadata.fbclid || "",
         };
 
         try {

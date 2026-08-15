@@ -44,6 +44,7 @@ export async function createCheckoutSession(
       customerName: bookingData.customerName,
       customerEmail: bookingData.customerEmail,
       customerPhone: bookingData.customerPhone,
+      fbclid: bookingData.fbclid ?? "",
     },
     line_items: [
       {

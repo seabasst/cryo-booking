@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
       customerName: body.customerName,
       customerEmail: body.customerEmail,
       customerPhone: body.customerPhone,
+      fbclid: body.fbclid ?? "",
     });
 
     if (!session.client_secret) {

@@ -61,6 +61,7 @@ export interface BookingData {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
+  fbclid?: string;
 }
 
 export interface CreateCheckoutRequest extends BookingData {}

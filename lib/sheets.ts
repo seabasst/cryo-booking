@@ -18,6 +18,7 @@ export async function logBookingToSheet(
     price: data.price,
     bokadirektServiceName: bokadirekt?.serviceName ?? "",
     suggestedResources: bokadirekt?.suggestedResources?.join(", ") ?? "",
+    fbclid: data.fbclid ?? "",
   };
 
   // Apps Script deployments follow redirects to Google — allow it
