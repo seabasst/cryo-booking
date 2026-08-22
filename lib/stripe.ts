@@ -28,24 +28,27 @@ export async function createCheckoutSession(
   const stripe = getStripe();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
+  const meta = {
+    serviceId: bookingData.serviceId,
+    serviceName: bookingData.serviceName,
+    duration: String(bookingData.duration),
+    price: String(bookingData.price),
+    slotId: bookingData.slotId,
+    date: bookingData.date,
+    time: bookingData.time,
+    customerName: bookingData.customerName,
+    customerEmail: bookingData.customerEmail,
+    customerPhone: bookingData.customerPhone,
+    fbclid: bookingData.fbclid ?? "",
+  };
   const session = await stripe.checkout.sessions.create({
     ui_mode: "embedded",
     payment_method_types: ["card"],
     mode: "payment",
     customer_email: bookingData.customerEmail,
-    metadata: {
-      serviceId: bookingData.serviceId,
-      serviceName: bookingData.serviceName,
-      duration: String(bookingData.duration),
-      price: String(bookingData.price),
-      slotId: bookingData.slotId,
-      date: bookingData.date,
-      time: bookingData.time,
-      customerName: bookingData.customerName,
-      customerEmail: bookingData.customerEmail,
-      customerPhone: bookingData.customerPhone,
-      fbclid: bookingData.fbclid ?? "",
-    },
+    metadata: meta,
+    // Forward to PaymentIntent so we can search by metadata['date']
+    payment_intent_data: { metadata: meta },
     line_items: [
       {
         price_data: {
@@ -63,6 +66,47 @@ export async function createCheckoutSession(
   });
 
   return session;
+}
+
+// ============================================
+// Our own paid bookings for a date (double-booking guard)
+// ============================================
+
+export interface OwnBooking {
+  serviceId: string;
+  time: string; // "HH:MM"
+  duration: number; // minutes
+}
+
+/**
+ * Returns bookings paid via our system for a given date. Used to close the
+ * gap between payment and FSA's manual Bokadirekt entry — a slot our system
+ * has sold is treated as busy even before it lands in Bokadirekt.
+ */
+export async function getPaidOwnBookingsForDate(
+  date: string
+): Promise<OwnBooking[]> {
+  const stripe = getStripe();
+  try {
+    const res = await stripe.paymentIntents.search({
+      query: `metadata['date']:'${date}' AND status:'succeeded'`,
+      limit: 100,
+    });
+    return res.data
+      .map((pi) => {
+        const m = pi.metadata ?? {};
+        if (!m.serviceId || !m.time || !m.duration) return null;
+        return {
+          serviceId: m.serviceId,
+          time: m.time,
+          duration: parseInt(m.duration, 10),
+        } as OwnBooking;
+      })
+      .filter((x): x is OwnBooking => x !== null);
+  } catch (err) {
+    console.error("Stripe search for own bookings failed:", err);
+    return [];
+  }
 }
 
 // ============================================

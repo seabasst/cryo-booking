@@ -5,6 +5,7 @@ import type {
   BookingData,
 } from "./types";
 import { getServiceById, TREATMENT_FAMILIES } from "./services";
+import { getPaidOwnBookingsForDate } from "./stripe";
 import mapping from "./bokadirekt-mapping.json";
 
 // ============================================
@@ -186,11 +187,20 @@ export async function getAvailableSlots(
   const jsDay = new Date(`${date}T12:00:00`).getDay(); // 0=Sun..6=Sat
   const weekday = WEEKDAYS[(jsDay + 6) % 7]; // shift to Mon=0..Sun=6
 
-  // Fetch bookings + resource availability for the date in parallel
-  const [allBookings, resources] = await Promise.all([
+  // Fetch bookings + resource availability + our own paid bookings in parallel
+  const [allBookings, resources, ownBookings] = await Promise.all([
     fetchBookingsForDate(date),
     fetchResourceAvailability(date, date),
+    getPaidOwnBookingsForDate(date),
   ]);
+
+  // Filter own bookings to this family and pre-parse intervals
+  const ownFamilyIntervals: [number, number][] = ownBookings
+    .filter((b) => findFamilyForService(b.serviceId) === familyId)
+    .map((b) => {
+      const start = parseHm(b.time);
+      return [start, start + b.duration] as [number, number];
+    });
 
   // Group bookings by resource
   const bookingsByResource = new Map<string, RawBooking[]>();
@@ -216,9 +226,12 @@ export async function getAvailableSlots(
 
   const duration = service.duration;
 
-  // For each candidate slot time, track: is it within ANY capable resource's
-  // working hours (i.e. worth showing), and is at least one such resource free?
-  const timeState = new Map<string, { withinHours: boolean; anyFree: boolean }>();
+  // Per time slot: count Bokadirekt-free capable resources, subtract our own
+  // paid bookings overlapping that time. Slot available iff difference > 0.
+  const timeState = new Map<
+    string,
+    { withinHours: boolean; freeResources: number }
+  >();
 
   for (const rid of family.bokadirektResourceIds) {
     if (!capableWithCapacity.has(rid)) continue; // skip vacation/sick/closed
@@ -241,11 +254,12 @@ export async function getAvailableSlots(
       start += SLOT_GRANULARITY_MIN
     ) {
       const key = fmtHm(start);
-      const state = timeState.get(key) ?? { withinHours: false, anyFree: false };
+      const state =
+        timeState.get(key) ?? { withinHours: false, freeResources: 0 };
       state.withinHours = true;
-      if (!state.anyFree) {
-        const interval: [number, number] = [start, start + duration];
-        state.anyFree = !busy.some((b) => overlaps(interval, b));
+      const interval: [number, number] = [start, start + duration];
+      if (!busy.some((b) => overlaps(interval, b))) {
+        state.freeResources += 1;
       }
       timeState.set(key, state);
     }
@@ -254,11 +268,17 @@ export async function getAvailableSlots(
   const sortedTimes = Array.from(timeState.keys()).sort();
   const slots: TimeSlot[] = sortedTimes
     .filter((t) => timeState.get(t)!.withinHours)
-    .map((time) => ({
-      id: `slot-${date}-${time.replace(":", "")}`,
-      time,
-      available: timeState.get(time)!.anyFree,
-    }));
+    .map((time) => {
+      const interval: [number, number] = [parseHm(time), parseHm(time) + duration];
+      const ownConflicts = ownFamilyIntervals.filter((b) =>
+        overlaps(interval, b)
+      ).length;
+      return {
+        id: `slot-${date}-${time.replace(":", "")}`,
+        time,
+        available: timeState.get(time)!.freeResources > ownConflicts,
+      };
+    });
 
   return { date, slots };
 }
