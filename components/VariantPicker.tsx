@@ -38,6 +38,9 @@ export default function VariantPicker({
       <h2 className="text-xl font-semibold text-fsa-text mb-2">{family.name}</h2>
       <p className="text-sm text-fsa-text-muted mb-5">{family.description}</p>
 
+      <p className="text-[10px] text-fsa-text-dim uppercase tracking-wider mb-3">
+        Alla priser inkl. moms 25%
+      </p>
       <div className="space-y-5">
         {groupKeys.map((groupName) => {
           const groupServices = groups[groupName];

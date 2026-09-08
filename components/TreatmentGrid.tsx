@@ -40,7 +40,7 @@ export default function TreatmentGrid({ onFamilySelect }: TreatmentGridProps) {
             </p>
 
             {/* Pricing tiers */}
-            <div className="mb-5 -mx-1 flex flex-wrap gap-1.5">
+            <div className="mb-1 -mx-1 flex flex-wrap gap-1.5">
               {family.priceTiers.map((tier, i) => (
                 <div
                   key={i}
@@ -66,6 +66,9 @@ export default function TreatmentGrid({ onFamilySelect }: TreatmentGridProps) {
                 </div>
               ))}
             </div>
+            <p className="text-[10px] text-fsa-text-dim mb-4 uppercase tracking-wider">
+              Alla priser inkl. moms 25%
+            </p>
 
             <span
               className="inline-flex items-center justify-center gap-2 mt-auto

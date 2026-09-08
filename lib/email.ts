@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { vatBreakdown, formatKr } from "./pricing";
 
 let resendInstance: Resend | null = null;
 
@@ -79,8 +80,15 @@ export async function sendCustomerConfirmation(data: BookingEmailData) {
             <tr><td style="padding: 12px 0; border-bottom: 1px solid #2a2a2a; color: #a0a0a0;">Längd</td><td style="padding: 12px 0; border-bottom: 1px solid #2a2a2a; text-align: right;">${data.duration} min</td></tr>
             <tr><td style="padding: 12px 0; border-bottom: 1px solid #2a2a2a; color: #a0a0a0;">Datum</td><td style="padding: 12px 0; border-bottom: 1px solid #2a2a2a; text-align: right;">${formatDate(data.date)}</td></tr>
             <tr><td style="padding: 12px 0; border-bottom: 1px solid #2a2a2a; color: #a0a0a0;">Tid</td><td style="padding: 12px 0; border-bottom: 1px solid #2a2a2a; text-align: right;">kl ${data.time}</td></tr>
-            <tr><td style="padding: 12px 0; ${data.customerOrgNumber ? "border-bottom: 1px solid #2a2a2a;" : ""} color: #a0a0a0;">Betalt</td><td style="padding: 12px 0; ${data.customerOrgNumber ? "border-bottom: 1px solid #2a2a2a;" : ""} text-align: right; color: #22c55e; font-weight: 600;">${formatPrice(data.price)}</td></tr>
-            ${data.customerOrgNumber ? `<tr><td style="padding: 12px 0; color: #a0a0a0;">Org.nr (friskvårdsbidrag)</td><td style="padding: 12px 0; text-align: right; font-variant-numeric: tabular-nums;">${data.customerOrgNumber}</td></tr>` : ""}
+            ${(() => {
+              const b = vatBreakdown(data.price);
+              return `
+                <tr><td style="padding: 8px 0; border-top: 1px solid #2a2a2a; color: #a0a0a0;">Netto (exkl. moms)</td><td style="padding: 8px 0; border-top: 1px solid #2a2a2a; text-align: right; font-variant-numeric: tabular-nums;">${formatKr(b.net)}</td></tr>
+                <tr><td style="padding: 8px 0; color: #a0a0a0;">Moms 25%</td><td style="padding: 8px 0; text-align: right; font-variant-numeric: tabular-nums;">${formatKr(b.vat)}</td></tr>
+                <tr><td style="padding: 12px 0; border-top: 1px solid #2a2a2a; color: #a0a0a0; font-weight: 600;">Totalt betalt</td><td style="padding: 12px 0; border-top: 1px solid #2a2a2a; text-align: right; color: #22c55e; font-weight: 600;">${formatKr(b.gross)}</td></tr>
+              `;
+            })()}
+            ${data.customerOrgNumber ? `<tr><td style="padding: 12px 0; border-top: 1px solid #2a2a2a; color: #a0a0a0;">Org.nr (friskvårdsbidrag)</td><td style="padding: 12px 0; border-top: 1px solid #2a2a2a; text-align: right; font-variant-numeric: tabular-nums;">${data.customerOrgNumber}</td></tr>` : ""}
           </table>
 
           <div style="background: #261010; border: 1px solid #22c55e40; border-radius: 12px; padding: 16px; margin-bottom: 24px;">

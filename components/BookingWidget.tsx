@@ -254,9 +254,14 @@ export default function BookingWidget({ cancelled }: BookingWidgetProps) {
                         {selectedService.duration} min
                       </p>
                     </div>
-                    <p className="text-fsa-red font-bold">
-                      {selectedService.price.toLocaleString("sv-SE")} kr
-                    </p>
+                    <div className="text-right">
+                      <p className="text-fsa-red font-bold">
+                        {selectedService.price.toLocaleString("sv-SE")} kr
+                      </p>
+                      <p className="text-[10px] text-fsa-text-dim uppercase tracking-wider">
+                        inkl. moms 25%
+                      </p>
+                    </div>
                   </div>
                 </div>
 

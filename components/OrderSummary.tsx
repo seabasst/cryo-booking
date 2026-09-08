@@ -5,6 +5,7 @@ import type { CustomerInfo, TimeSlot, Service } from "@/lib/types";
 import EmbeddedCheckoutModal from "./EmbeddedCheckoutModal";
 import BackBar from "./BackBar";
 import { trackPixel } from "@/lib/pixel";
+import { vatBreakdown, formatKr } from "@/lib/pricing";
 
 interface OrderSummaryProps {
   selectedService: Service;
@@ -181,12 +182,27 @@ export default function OrderSummary({
       </div>
 
       {/* Total */}
-      <div className="flex justify-between items-center py-4 border-t border-fsa-gray-light mb-4">
-        <span className="text-fsa-text font-medium">Totalt att betala</span>
-        <span className="text-2xl font-bold text-fsa-red">
-          {selectedService.price.toLocaleString("sv-SE")} kr
-        </span>
-      </div>
+      {(() => {
+        const b = vatBreakdown(selectedService.price);
+        return (
+          <div className="py-4 border-t border-fsa-gray-light mb-4 space-y-1.5">
+            <div className="flex justify-between text-sm text-fsa-text-muted">
+              <span>Netto (exkl. moms)</span>
+              <span className="font-variant-numeric tabular-nums">{formatKr(b.net)}</span>
+            </div>
+            <div className="flex justify-between text-sm text-fsa-text-muted">
+              <span>Moms 25%</span>
+              <span className="font-variant-numeric tabular-nums">{formatKr(b.vat)}</span>
+            </div>
+            <div className="flex justify-between items-center pt-2 border-t border-fsa-gray-light/50">
+              <span className="text-fsa-text font-medium">Totalt att betala</span>
+              <span className="text-2xl font-bold text-fsa-red font-variant-numeric tabular-nums">
+                {formatKr(b.gross)}
+              </span>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Terms checkbox */}
       <label className="flex items-start gap-3 mb-4 cursor-pointer">
