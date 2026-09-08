@@ -5,7 +5,7 @@ import type {
   BookingData,
 } from "./types";
 import { getServiceById, TREATMENT_FAMILIES } from "./services";
-import { getPaidOwnBookingsForDate } from "./stripe";
+import { getActiveOwnBookingsForDate } from "./stripe";
 import mapping from "./bokadirekt-mapping.json";
 
 // ============================================
@@ -191,7 +191,7 @@ export async function getAvailableSlots(
   const [allBookings, resources, ownBookings] = await Promise.all([
     fetchBookingsForDate(date),
     fetchResourceAvailability(date, date),
-    getPaidOwnBookingsForDate(date),
+    getActiveOwnBookingsForDate(date),
   ]);
 
   // Filter own bookings to this family and pre-parse intervals

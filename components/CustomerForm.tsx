@@ -37,6 +37,11 @@ export default function CustomerForm({
 
     if (!formData.name.trim()) {
       newErrors.name = "Namn krävs";
+    } else {
+      const parts = formData.name.trim().split(/\s+/);
+      if (parts.length < 2 || parts.some((p) => p.length < 2)) {
+        newErrors.name = "Ange både förnamn och efternamn";
+      }
     }
 
     if (!formData.email.trim()) {
@@ -133,7 +138,7 @@ export default function CustomerForm({
                   : "border-fsa-gray-light focus:border-fsa-red"
               }
             `}
-            placeholder="Ditt fullständiga namn"
+            placeholder="Förnamn och efternamn"
           />
           {errors.name && (
             <p className="mt-1 text-sm text-red-400">{errors.name}</p>

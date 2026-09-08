@@ -78,21 +78,31 @@ export interface OwnBooking {
   duration: number; // minutes
 }
 
+const LOCK_TTL_SEC = 15 * 60; // in-flight checkout holds a slot for 15 min
+
 /**
- * Returns bookings paid via our system for a given date. Used to close the
- * gap between payment and FSA's manual Bokadirekt entry — a slot our system
- * has sold is treated as busy even before it lands in Bokadirekt.
+ * Returns bookings our system currently holds for a given date. Includes:
+ *  - fully paid (status=succeeded) — hard block until Bokadirekt entry
+ *  - in-flight (any non-canceled/failed status, created within LOCK_TTL) —
+ *    prevents two customers grabbing the same slot mid-checkout
  */
-export async function getPaidOwnBookingsForDate(
+export async function getActiveOwnBookingsForDate(
   date: string
 ): Promise<OwnBooking[]> {
   const stripe = getStripe();
+  const now = Math.floor(Date.now() / 1000);
   try {
     const res = await stripe.paymentIntents.search({
-      query: `metadata['date']:'${date}' AND status:'succeeded'`,
+      query: `metadata['date']:'${date}'`,
       limit: 100,
     });
     return res.data
+      .filter((pi) => {
+        if (pi.status === "succeeded") return true;
+        if (pi.status === "canceled") return false;
+        // Any other status only counts as lock while fresh
+        return pi.created > now - LOCK_TTL_SEC;
+      })
       .map((pi) => {
         const m = pi.metadata ?? {};
         if (!m.serviceId || !m.time || !m.duration) return null;
@@ -108,6 +118,36 @@ export async function getPaidOwnBookingsForDate(
     return [];
   }
 }
+
+/**
+ * True if this customer (matched by email or phone) has already succeeded
+ * with the given service. Used to enforce one-per-person on "prova på".
+ */
+export async function hasCustomerAlreadyPurchased(
+  serviceId: string,
+  email: string,
+  phone: string
+): Promise<boolean> {
+  const stripe = getStripe();
+  const q = (field: string, value: string) =>
+    stripe.paymentIntents.search({
+      query: `metadata['serviceId']:'${serviceId}' AND metadata['${field}']:'${value}' AND status:'succeeded'`,
+      limit: 1,
+    });
+  try {
+    const [byEmail, byPhone] = await Promise.all([
+      q("customerEmail", email.trim()),
+      q("customerPhone", phone.trim()),
+    ]);
+    return byEmail.data.length > 0 || byPhone.data.length > 0;
+  } catch (err) {
+    console.error("Prova-på duplicate check failed:", err);
+    return false; // fail open — don't block on error
+  }
+}
+// ponytail: matches only exact-typed metadata. Different casing/formatting
+// of the same customer slips through. Upgrade path: normalize both on write
+// and query, or move to a proper KV/DB store keyed by canonical email.
 
 // ============================================
 // Retrieve Checkout Session

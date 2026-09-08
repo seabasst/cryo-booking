@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createCheckoutSession } from "@/lib/stripe";
+import { createCheckoutSession, hasCustomerAlreadyPurchased } from "@/lib/stripe";
 import type { CreateCheckoutRequest } from "@/lib/types";
+
+const ONE_TIME_SERVICES = new Set(["kryoterapi-prova-pa"]);
 
 // Demo mode: Skip Stripe when no API key is configured
 const DEMO_MODE = !process.env.STRIPE_SECRET_KEY;
@@ -41,12 +43,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Require both first + last name
+    const nameParts = body.customerName.trim().split(/\s+/);
+    if (nameParts.length < 2 || nameParts.some((p) => p.length < 2)) {
+      return NextResponse.json(
+        { error: "Ange både förnamn och efternamn." },
+        { status: 400 }
+      );
+    }
+
     // Validate price is positive
     if (body.price <= 0) {
       return NextResponse.json(
         { error: "Invalid price" },
         { status: 400 }
       );
+    }
+
+    // One-time-per-person guard (prova-på-erbjudanden)
+    if (ONE_TIME_SERVICES.has(body.serviceId)) {
+      const already = await hasCustomerAlreadyPurchased(
+        body.serviceId,
+        body.customerEmail,
+        body.customerPhone
+      );
+      if (already) {
+        return NextResponse.json(
+          {
+            error:
+              "Detta erbjudande är ett prova-på-pris och kan bara utnyttjas en gång per kund. Välj ordinarie behandling istället.",
+          },
+          { status: 400 }
+        );
+      }
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
