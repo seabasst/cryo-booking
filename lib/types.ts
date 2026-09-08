@@ -48,6 +48,7 @@ export interface CustomerInfo {
   name: string;
   email: string;
   phone: string;
+  orgNumber?: string;
 }
 
 export interface BookingData {
@@ -61,6 +62,7 @@ export interface BookingData {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
+  customerOrgNumber?: string;
   fbclid?: string;
 }
 

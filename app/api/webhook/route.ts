@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
           customerName: metadata.customerName,
           customerEmail: metadata.customerEmail,
           customerPhone: metadata.customerPhone,
+          customerOrgNumber: metadata.customerOrgNumber || "",
           serviceId: metadata.serviceId,
           serviceName: metadata.serviceName,
           duration: parseInt(metadata.duration, 10),

@@ -23,6 +23,7 @@ export default function CustomerForm({
     name: "",
     email: "",
     phone: "",
+    orgNumber: "",
   });
   const [errors, setErrors] = useState<Partial<CustomerInfo>>({});
 
@@ -205,6 +206,28 @@ export default function CustomerForm({
           {errors.phone && (
             <p className="mt-1 text-sm text-red-400">{errors.phone}</p>
           )}
+        </div>
+
+        <div>
+          <label
+            htmlFor="orgNumber"
+            className="block text-sm font-medium text-fsa-text mb-1.5"
+          >
+            Org.nr <span className="text-fsa-text-muted font-normal">(valfritt — anges för kvitto till friskvårdsbidrag)</span>
+          </label>
+          <input
+            type="text"
+            id="orgNumber"
+            inputMode="numeric"
+            value={formData.orgNumber ?? ""}
+            onChange={(e) => handleChange("orgNumber", e.target.value)}
+            className="w-full px-4 py-3 rounded-lg
+              bg-fsa-dark border border-fsa-gray-light
+              text-fsa-text placeholder-fsa-text-dim
+              transition-all duration-200
+              focus:outline-none focus:ring-2 focus:ring-fsa-red/50 focus:border-fsa-red"
+            placeholder="XXXXXX-XXXX"
+          />
         </div>
 
         <div className="flex gap-3 pt-4">

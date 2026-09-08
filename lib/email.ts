@@ -21,6 +21,7 @@ export interface BookingEmailData {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
+  customerOrgNumber?: string;
   fbclid?: string;
 }
 
@@ -78,7 +79,8 @@ export async function sendCustomerConfirmation(data: BookingEmailData) {
             <tr><td style="padding: 12px 0; border-bottom: 1px solid #2a2a2a; color: #a0a0a0;">Längd</td><td style="padding: 12px 0; border-bottom: 1px solid #2a2a2a; text-align: right;">${data.duration} min</td></tr>
             <tr><td style="padding: 12px 0; border-bottom: 1px solid #2a2a2a; color: #a0a0a0;">Datum</td><td style="padding: 12px 0; border-bottom: 1px solid #2a2a2a; text-align: right;">${formatDate(data.date)}</td></tr>
             <tr><td style="padding: 12px 0; border-bottom: 1px solid #2a2a2a; color: #a0a0a0;">Tid</td><td style="padding: 12px 0; border-bottom: 1px solid #2a2a2a; text-align: right;">kl ${data.time}</td></tr>
-            <tr><td style="padding: 12px 0; color: #a0a0a0;">Betalt</td><td style="padding: 12px 0; text-align: right; color: #22c55e; font-weight: 600;">${formatPrice(data.price)}</td></tr>
+            <tr><td style="padding: 12px 0; ${data.customerOrgNumber ? "border-bottom: 1px solid #2a2a2a;" : ""} color: #a0a0a0;">Betalt</td><td style="padding: 12px 0; ${data.customerOrgNumber ? "border-bottom: 1px solid #2a2a2a;" : ""} text-align: right; color: #22c55e; font-weight: 600;">${formatPrice(data.price)}</td></tr>
+            ${data.customerOrgNumber ? `<tr><td style="padding: 12px 0; color: #a0a0a0;">Org.nr (friskvårdsbidrag)</td><td style="padding: 12px 0; text-align: right; font-variant-numeric: tabular-nums;">${data.customerOrgNumber}</td></tr>` : ""}
           </table>
 
           <div style="background: #261010; border: 1px solid #22c55e40; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
@@ -161,6 +163,7 @@ export async function sendBusinessNotification(
           <tr><td style="padding: 8px 0; color: #666;">Namn</td><td style="padding: 8px 0; text-align: right;">${data.customerName}</td></tr>
           <tr><td style="padding: 8px 0; color: #666;">E-post</td><td style="padding: 8px 0; text-align: right;"><a href="mailto:${data.customerEmail}">${data.customerEmail}</a></td></tr>
           <tr><td style="padding: 8px 0; color: #666;">Telefon</td><td style="padding: 8px 0; text-align: right;"><a href="tel:${data.customerPhone}">${data.customerPhone}</a></td></tr>
+          ${data.customerOrgNumber ? `<tr><td style="padding: 8px 0; color: #666;">Org.nr</td><td style="padding: 8px 0; text-align: right; font-variant-numeric: tabular-nums;">${data.customerOrgNumber}</td></tr>` : ""}
         </table>
       </div>
     </body>

@@ -112,6 +112,7 @@ export async function POST(request: NextRequest) {
       customerName: body.customerName,
       customerEmail: body.customerEmail,
       customerPhone: body.customerPhone,
+      customerOrgNumber: body.customerOrgNumber ?? "",
       fbclid: body.fbclid ?? "",
     });
 
