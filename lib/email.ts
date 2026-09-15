@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { vatBreakdown, formatKr } from "./pricing";
+import { generateReceiptPdf } from "./receipt-pdf";
 
 let resendInstance: Resend | null = null;
 
@@ -23,7 +24,9 @@ export interface BookingEmailData {
   customerEmail: string;
   customerPhone: string;
   customerOrgNumber?: string;
+  customerPersonalNumber?: string;
   fbclid?: string;
+  receiptId?: string; // Stripe session id, used for PDF receipt filename + id
 }
 
 export interface BokadirektHint {
@@ -107,11 +110,35 @@ export async function sendCustomerConfirmation(data: BookingEmailData) {
     </html>
   `;
 
+  // Generate PDF receipt (Swedish förenklad faktura) and attach.
+  let attachments: Array<{ filename: string; content: Buffer }> | undefined;
+  try {
+    const pdf = await generateReceiptPdf({
+      receiptId: data.receiptId ?? `${data.date}-${data.time}-${data.customerEmail}`,
+      issuedAt: new Date(),
+      serviceName: data.serviceName,
+      duration: data.duration,
+      bookingDate: data.date,
+      bookingTime: data.time,
+      price: data.price,
+      customerName: data.customerName,
+      customerEmail: data.customerEmail,
+      customerOrgNumber: data.customerOrgNumber,
+      customerPersonalNumber: data.customerPersonalNumber,
+    });
+    attachments = [
+      { filename: `kvitto-${data.date}-${data.time.replace(":", "")}.pdf`, content: pdf },
+    ];
+  } catch (e) {
+    console.error("PDF generation failed, sending email without attachment:", e);
+  }
+
   return resend.emails.send({
     from: FROM_ADDRESS,
     to: data.customerEmail,
     subject: `Bokning bekräftad – ${data.serviceName} ${formatDate(data.date)}`,
     html,
+    ...(attachments ? { attachments } : {}),
   });
 }
 

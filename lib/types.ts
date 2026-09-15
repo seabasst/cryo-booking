@@ -49,6 +49,7 @@ export interface CustomerInfo {
   email: string;
   phone: string;
   orgNumber?: string;
+  personalNumber?: string;
 }
 
 export interface BookingData {
@@ -63,7 +64,9 @@ export interface BookingData {
   customerEmail: string;
   customerPhone: string;
   customerOrgNumber?: string;
+  customerPersonalNumber?: string;
   fbclid?: string;
+  receiptId?: string;
 }
 
 export interface CreateCheckoutRequest extends BookingData {}

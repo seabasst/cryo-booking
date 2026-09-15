@@ -63,11 +63,13 @@ export async function POST(request: NextRequest) {
           customerEmail: metadata.customerEmail,
           customerPhone: metadata.customerPhone,
           customerOrgNumber: metadata.customerOrgNumber || "",
+          customerPersonalNumber: metadata.customerPersonalNumber || "",
           serviceId: metadata.serviceId,
           serviceName: metadata.serviceName,
           duration: parseInt(metadata.duration, 10),
           price: parseInt(metadata.price, 10),
           fbclid: metadata.fbclid || "",
+          receiptId: session.id,
         };
 
         try {

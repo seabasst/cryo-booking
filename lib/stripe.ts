@@ -40,6 +40,7 @@ export async function createCheckoutSession(
     customerEmail: bookingData.customerEmail,
     customerPhone: bookingData.customerPhone,
     customerOrgNumber: bookingData.customerOrgNumber ?? "",
+    customerPersonalNumber: bookingData.customerPersonalNumber ?? "",
     fbclid: bookingData.fbclid ?? "",
   };
   const session = await stripe.checkout.sessions.create({

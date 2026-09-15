@@ -24,6 +24,7 @@ export default function CustomerForm({
     email: "",
     phone: "",
     orgNumber: "",
+    personalNumber: "",
   });
   const [errors, setErrors] = useState<Partial<CustomerInfo>>({});
 
@@ -209,25 +210,35 @@ export default function CustomerForm({
         </div>
 
         <div>
-          <label
-            htmlFor="orgNumber"
-            className="block text-sm font-medium text-fsa-text mb-1.5"
-          >
-            Org.nr <span className="text-fsa-text-muted font-normal">(valfritt — anges för kvitto till friskvårdsbidrag)</span>
-          </label>
-          <input
-            type="text"
-            id="orgNumber"
-            inputMode="numeric"
-            value={formData.orgNumber ?? ""}
-            onChange={(e) => handleChange("orgNumber", e.target.value)}
-            className="w-full px-4 py-3 rounded-lg
-              bg-fsa-dark border border-fsa-gray-light
-              text-fsa-text placeholder-fsa-text-dim
-              transition-all duration-200
-              focus:outline-none focus:ring-2 focus:ring-fsa-red/50 focus:border-fsa-red"
-            placeholder="XXXXXX-XXXX"
-          />
+          <p className="block text-xs font-medium text-fsa-text-muted mb-2 uppercase tracking-wider">
+            Friskvårdsbidrag (valfritt)
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={formData.personalNumber ?? ""}
+              onChange={(e) => handleChange("personalNumber", e.target.value)}
+              className="w-full px-4 py-3 rounded-lg
+                bg-fsa-dark border border-fsa-gray-light
+                text-fsa-text placeholder-fsa-text-dim
+                transition-all duration-200
+                focus:outline-none focus:ring-2 focus:ring-fsa-red/50 focus:border-fsa-red"
+              placeholder="Personnr (ÅÅMMDD-XXXX)"
+            />
+            <input
+              type="text"
+              inputMode="numeric"
+              value={formData.orgNumber ?? ""}
+              onChange={(e) => handleChange("orgNumber", e.target.value)}
+              className="w-full px-4 py-3 rounded-lg
+                bg-fsa-dark border border-fsa-gray-light
+                text-fsa-text placeholder-fsa-text-dim
+                transition-all duration-200
+                focus:outline-none focus:ring-2 focus:ring-fsa-red/50 focus:border-fsa-red"
+              placeholder="Org.nr (XXXXXX-XXXX)"
+            />
+          </div>
         </div>
 
         <div className="flex gap-3 pt-4">

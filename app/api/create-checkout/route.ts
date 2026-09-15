@@ -113,6 +113,7 @@ export async function POST(request: NextRequest) {
       customerEmail: body.customerEmail,
       customerPhone: body.customerPhone,
       customerOrgNumber: body.customerOrgNumber ?? "",
+      customerPersonalNumber: body.customerPersonalNumber ?? "",
       fbclid: body.fbclid ?? "",
     });
 

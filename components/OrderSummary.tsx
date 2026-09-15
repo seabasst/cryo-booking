@@ -63,6 +63,7 @@ export default function OrderSummary({
           customerEmail: customerInfo.email,
           customerPhone: customerInfo.phone,
           customerOrgNumber: customerInfo.orgNumber?.trim() || "",
+          customerPersonalNumber: customerInfo.personalNumber?.trim() || "",
           fbclid: new URLSearchParams(window.location.search).get("fbclid") ?? "",
         }),
       });
