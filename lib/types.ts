@@ -31,6 +31,7 @@ export interface TreatmentFamily {
   description: string;
   priceTiers: PriceTier[];
   serviceIds: string[];
+  memberBookingUrl?: string; // members book here (Bokadirekt) instead of paying online
 }
 
 export interface TimeSlot {

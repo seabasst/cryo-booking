@@ -55,6 +55,41 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
         description:
           "Kompressionsbyxor – boostar återhämtningen, blodcirkulationen och tar bort slaggprodukter",
       },
+      {
+        id: "ir-bastu-30",
+        name: "IR Sauna 1 person",
+        duration: 30,
+        price: 500,
+        description: "Infraröd bastu – 30 min, 1 person",
+      },
+      {
+        id: "ir-bastu-2p",
+        name: "IR Sauna 2 personer",
+        duration: 30,
+        price: 600,
+        description: "Infraröd bastu – 30 min, 2 personer",
+      },
+      {
+        id: "ir-bastu-3p",
+        name: "IR Sauna 3 personer",
+        duration: 30,
+        price: 700,
+        description: "Infraröd bastu – 30 min, 3 personer",
+      },
+      {
+        id: "ir-bastu-4p",
+        name: "IR Sauna 4 personer",
+        duration: 30,
+        price: 800,
+        description: "Infraröd bastu – 30 min, 4 personer",
+      },
+      {
+        id: "ir-bastu-5p",
+        name: "IR Sauna 5 personer",
+        duration: 30,
+        price: 900,
+        description: "Infraröd bastu – 30 min, 5 personer",
+      },
     ],
   },
   {
@@ -300,6 +335,29 @@ export const TREATMENT_FAMILIES: TreatmentFamily[] = [
       "Kompressionsbyxor som boostar återhämtningen, blodcirkulationen och tar bort slaggprodukter. Vanlig behandling efter match eller hård träning.",
     priceTiers: [{ label: "1x", price: 200 }],
     serviceIds: ["recovery-ultimate"],
+  },
+  {
+    id: "ir-bastu",
+    name: "IR Sauna",
+    // ponytail: generic FSA photo, swap for a real IR sauna image
+    image:
+      "https://images.squarespace-cdn.com/content/v1/66def6493457365fcadf9c12/e56f38ad-18d1-408c-b954-959cd1ee6c0b/fsa.jpg",
+    description:
+      "Infraröd bastu som värmer kroppen inifrån. 30 minuter för avslappning och återhämtning efter träning.",
+    priceTiers: [
+      { label: "1 pers", price: 500 },
+      { label: "2 pers", price: 600 },
+      { label: "5 pers", price: 900 },
+    ],
+    serviceIds: [
+      "ir-bastu-30",
+      "ir-bastu-2p",
+      "ir-bastu-3p",
+      "ir-bastu-4p",
+      "ir-bastu-5p",
+    ],
+    memberBookingUrl:
+      "https://www.bokadirekt.se/boka-tjanst/fsa-workouts-hq-55818/ir-bastu-1-person-3504268",
   },
   {
     id: "insculpt-chair",

@@ -85,6 +85,19 @@
         "e27b7faf-f481-4f1f-9fee-2318c4d0d459",
         "b2383330-3c29-4d24-9023-f3f2b6736275"
       ]
+    },
+    "ir-bastu": {
+      "bokadirektFamilyId": "ir-bastu",
+      "bokadirektServiceIds": [
+        "130fc7d9-ebb9-4fe4-a01a-949946e715de",
+        "fa6ca965-f2d5-485b-a1dc-efc1fc4f0bb9",
+        "4e7abdbc-72ff-48af-878f-f929e5bc03d2",
+        "b7b35056-312d-4fca-b0a6-d4a4738108e7",
+        "7ed00fbe-8087-478e-add1-0ad9dc6000d3"
+      ],
+      "bokadirektResourceIds": [
+        "b528b29d-483c-4d50-aad9-135997266764"
+      ]
     }
   },
   "resources": {
@@ -249,6 +262,41 @@
           "close": "20:45"
         }
       }
+    },
+    "b528b29d-483c-4d50-aad9-135997266764": {
+      "name": "IR Bastu",
+      "nickname": "IR Bastu",
+      "bookableOnline": true,
+      "hoursByWeekday": {
+        "wed": {
+          "open": "08:00",
+          "close": "20:45"
+        },
+        "sun": {
+          "open": "10:00",
+          "close": "17:45"
+        },
+        "tue": {
+          "open": "08:00",
+          "close": "20:45"
+        },
+        "sat": {
+          "open": "10:00",
+          "close": "15:45"
+        },
+        "thu": {
+          "open": "08:00",
+          "close": "20:45"
+        },
+        "fri": {
+          "open": "08:00",
+          "close": "20:45"
+        },
+        "mon": {
+          "open": "08:00",
+          "close": "20:45"
+        }
+      }
     }
   },
   "serviceMap": {
@@ -359,6 +407,26 @@
     "insculpt-chair": {
       "bokadirektServiceId": "509f2259-c302-4170-ba3d-84fb86002d50",
       "bokadirektServiceName": "Insculpt Chair"
+    },
+    "ir-bastu-30": {
+      "bokadirektServiceId": "130fc7d9-ebb9-4fe4-a01a-949946e715de",
+      "bokadirektServiceName": "IR Bastu 1 person"
+    },
+    "ir-bastu-2p": {
+      "bokadirektServiceId": "fa6ca965-f2d5-485b-a1dc-efc1fc4f0bb9",
+      "bokadirektServiceName": "IR Bastu 2 personer"
+    },
+    "ir-bastu-3p": {
+      "bokadirektServiceId": "4e7abdbc-72ff-48af-878f-f929e5bc03d2",
+      "bokadirektServiceName": "IR Bastu 3 personer"
+    },
+    "ir-bastu-4p": {
+      "bokadirektServiceId": "b7b35056-312d-4fca-b0a6-d4a4738108e7",
+      "bokadirektServiceName": "IR Bastu 4 personer"
+    },
+    "ir-bastu-5p": {
+      "bokadirektServiceId": "7ed00fbe-8087-478e-add1-0ad9dc6000d3",
+      "bokadirektServiceName": "IR Bastu 5 personer"
     }
   }
 }

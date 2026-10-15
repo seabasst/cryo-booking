@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createCheckoutSession, hasCustomerAlreadyPurchased } from "@/lib/stripe";
+import { getServiceById } from "@/lib/services";
 import type { CreateCheckoutRequest } from "@/lib/types";
 
 const ONE_TIME_SERVICES = new Set(["kryoterapi-prova-pa"]);
@@ -52,13 +53,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate price is positive
-    if (body.price <= 0) {
+    // Never trust client-sent name/duration/price — take them from our catalog
+    const lookup = getServiceById(body.serviceId);
+    if (!lookup) {
       return NextResponse.json(
-        { error: "Invalid price" },
+        { error: "Unknown service" },
         { status: 400 }
       );
     }
+    body.serviceName = lookup.service.name;
+    body.duration = lookup.service.duration;
+    body.price = lookup.service.price;
 
     // One-time-per-person guard (prova-på-erbjudanden)
     if (ONE_TIME_SERVICES.has(body.serviceId)) {
