@@ -19,6 +19,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
+  // Cron runs 06-20 UTC to cover both CET and CEST; only act 08-21 Stockholm
+  const hour = Number(
+    new Date().toLocaleString("sv-SE", {
+      timeZone: "Europe/Stockholm",
+      hour: "2-digit",
+    })
+  );
+  if (hour < 8 || hour > 21) {
+    return NextResponse.json({ skipped: "outside 08-21 Stockholm" });
+  }
+
   const paid = await getUpcomingPaidBookings();
   const unsynced = await getUnsyncedPaidBookings(paid);
 
