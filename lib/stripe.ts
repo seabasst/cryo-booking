@@ -152,6 +152,43 @@ export async function hasCustomerAlreadyPurchased(
 // and query, or move to a proper KV/DB store keyed by canonical email.
 
 // ============================================
+// Upcoming paid bookings (for Bokadirekt sync reminder)
+// ============================================
+
+/**
+ * Succeeded payments whose booking date+time is still ahead (Stockholm time)
+ * and that were paid more than `minAgeMin` minutes ago.
+ */
+export async function getUpcomingPaidBookings(minAgeMin = 15) {
+  const stripe = getStripe();
+  const now = Math.floor(Date.now() / 1000);
+  const nowLocal = new Date()
+    .toLocaleString("sv-SE", { timeZone: "Europe/Stockholm" })
+    .slice(0, 16); // "YYYY-MM-DD HH:MM"
+  const result = [];
+  for await (const pi of stripe.paymentIntents.search({
+    query: `status:'succeeded' AND created>${now - 60 * 86400}`,
+    limit: 100,
+    expand: ["data.latest_charge"],
+  })) {
+    const m = pi.metadata ?? {};
+    if (!m.serviceId || !m.date || !m.time) continue;
+    const charge = pi.latest_charge as Stripe.Charge | null;
+    if (charge?.refunded) continue; // cancelled + refunded, nothing to enter
+    if (pi.created > now - minAgeMin * 60) continue;
+    if (`${m.date} ${m.time}` < nowLocal) continue;
+    result.push({
+      serviceId: m.serviceId,
+      serviceName: m.serviceName ?? m.serviceId,
+      date: m.date,
+      time: m.time,
+      customerName: m.customerName ?? "",
+    });
+  }
+  return result;
+}
+
+// ============================================
 // Retrieve Checkout Session
 // ============================================
 export async function getCheckoutSession(

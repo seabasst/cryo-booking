@@ -65,9 +65,13 @@ async function fetchResourceAvailability(
   return (await res.json()) as RawResource[];
 }
 
-async function fetchBookingsForDate(date: string): Promise<RawBooking[]> {
+async function fetchBookingsForDate(
+  date: string,
+  strict = false // throw instead of returning [] — callers that must not mistake an outage for "no bookings"
+): Promise<RawBooking[]> {
   const key = process.env.BOKADIREKT_API_KEY;
   if (!key) {
+    if (strict) throw new Error("BOKADIREKT_API_KEY not configured");
     console.warn("BOKADIREKT_API_KEY not configured — skipping API call");
     return [];
   }
@@ -87,6 +91,7 @@ async function fetchBookingsForDate(date: string): Promise<RawBooking[]> {
 
   if (!res.ok) {
     console.error(`Bokadirekt bookings fetch failed: ${res.status}`);
+    if (strict) throw new Error(`Bokadirekt bookings fetch failed: ${res.status}`);
     return [];
   }
 
@@ -418,4 +423,55 @@ export async function getAvailableCount(
 ): Promise<number> {
   const { slots } = await getAvailableSlots(date, serviceId);
   return slots.filter((s) => s.available).length;
+}
+
+// ============================================
+// Sync check: paid online bookings not yet entered in Bokadirekt
+// ============================================
+
+export interface PaidBooking {
+  serviceId: string;
+  serviceName: string;
+  date: string; // YYYY-MM-DD
+  time: string; // HH:MM
+  customerName: string;
+}
+
+const SYNC_TOLERANCE_MIN = 15;
+
+/**
+ * A paid booking counts as entered when Bokadirekt has a non-cancelled
+ * booking on one of the family's resources starting within ±15 min.
+ */
+export function findUnsynced(
+  paid: PaidBooking[],
+  bdBookings: Pick<RawBooking, "resourceId" | "startDate" | "cancelled">[]
+): PaidBooking[] {
+  return paid.filter((p) => {
+    const familyId = findFamilyForService(p.serviceId);
+    const resources = familyId
+      ? typedMapping.families[familyId]?.bokadirektResourceIds ?? []
+      : [];
+    const start = parseHm(p.time);
+    return !bdBookings.some(
+      (b) =>
+        !b.cancelled &&
+        resources.includes(b.resourceId) &&
+        b.startDate.slice(0, 10) === p.date &&
+        Math.abs(parseHm(b.startDate.slice(11, 16)) - start) <=
+          SYNC_TOLERANCE_MIN
+    );
+  });
+}
+// ponytail: a member booking on the same resource+time also counts as
+// "entered" — that case is a double booking anyway and staff will see it.
+
+export async function getUnsyncedPaidBookings(
+  paid: PaidBooking[]
+): Promise<PaidBooking[]> {
+  const dates = Array.from(new Set(paid.map((p) => p.date)));
+  const perDate = await Promise.all(
+    dates.map((d) => fetchBookingsForDate(d, true))
+  );
+  return findUnsynced(paid, perDate.flat());
 }
