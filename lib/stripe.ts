@@ -97,10 +97,14 @@ export async function getActiveOwnBookingsForDate(
     const res = await stripe.paymentIntents.search({
       query: `metadata['date']:'${date}'`,
       limit: 100,
+      expand: ["data.latest_charge"],
     });
     return res.data
       .filter((pi) => {
-        if (pi.status === "succeeded") return true;
+        if (pi.status === "succeeded") {
+          const charge = pi.latest_charge as Stripe.Charge | null;
+          return !charge?.refunded; // cancelled + refunded frees the slot
+        }
         if (pi.status === "canceled") return false;
         // Any other status only counts as lock while fresh
         return pi.created > now - LOCK_TTL_SEC;
