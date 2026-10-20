@@ -103,9 +103,6 @@ async function fetchBookingsForDate(
 // Slot computation
 // ============================================
 
-const WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
-const SLOT_GRANULARITY_MIN = 15;
-
 function findFamilyForService(serviceId: string): string | null {
   for (const family of TREATMENT_FAMILIES) {
     if (family.serviceIds.includes(serviceId)) return family.id;
@@ -119,11 +116,6 @@ function parseHm(hm: string): number {
   return h * 60 + m;
 }
 
-function fmtHm(mins: number): string {
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-}
 
 function bookingInterval(b: RawBooking): [number, number] {
   const s = new Date(b.startDate);
@@ -156,132 +148,95 @@ interface MappingFile {
   resources: Record<string, ResourceMapping>;
   serviceMap: Record<
     string,
-    { bokadirektServiceId: string; bokadirektServiceName: string }
+    {
+      bokadirektServiceId: string;
+      bokadirektServiceName: string;
+      publicServiceId?: number;
+    }
   >;
 }
 
 const typedMapping = mapping as MappingFile;
 
+// Bokadirekt's public booking page computes real bookable times from staff
+// shifts, absence and per-service buffer time. The documented external API
+// only exposes minutes per day, so slot times come from here.
+// ponytail: undocumented endpoint (what bokadirekt.se itself calls). If it
+// changes or fails we show no times rather than wrong ones.
+const PUBLIC_PLACE_ID = 55818;
+
+interface PublicSlot {
+  start: string; // "2026-10-21T09:00:00+02:00"
+  duration: number; // minutes, incl. Bokadirekt buffer
+  employeeId: number;
+}
+
+async function fetchPublicSlots(
+  publicServiceId: number,
+  date: string
+): Promise<PublicSlot[]> {
+  // Returns the Mon-Sun week containing this timestamp
+  const weekMs = Date.parse(`${date}T00:00:00Z`);
+  const res = await fetch(
+    `https://www.bokadirekt.se/api/book/${publicServiceId}/${PUBLIC_PLACE_ID}/${weekMs}/0?reborn=true`,
+    { next: { revalidate: 60 } }
+  );
+  if (!res.ok) throw new Error(`Bokadirekt public slots failed: ${res.status}`);
+  const data = await res.json();
+  const all: PublicSlot[] = data?.availability?.fromErp ?? [];
+  return all.filter((s) => s.start.slice(0, 10) === date);
+}
+
 /**
- * Compute available slots for a specific service on a specific date.
- * A slot is "available" if AT LEAST ONE capable resource is free for the
- * full service duration starting at that time.
+ * Slots for a service on a date = Bokadirekt's own free times, minus our
+ * paid/in-checkout bookings that staff have not entered in Bokadirekt yet.
  */
 export async function getAvailableSlots(
   date: string,
   serviceId?: string
 ): Promise<AvailableSlotsResponse> {
-  if (!serviceId) {
-    // Backwards-compat: no service picked → return empty; frontend should always pass serviceId now
-    return { date, slots: [] };
-  }
+  if (!serviceId) return { date, slots: [] };
 
-  const svcLookup = getServiceById(serviceId);
-  if (!svcLookup) return { date, slots: [] };
-  const { service } = svcLookup;
-
+  const publicServiceId = typedMapping.serviceMap[serviceId]?.publicServiceId;
   const familyId = findFamilyForService(serviceId);
-  if (!familyId) return { date, slots: [] };
+  if (!publicServiceId || !familyId) return { date, slots: [] };
 
-  const family = typedMapping.families[familyId];
-  if (!family || family.bokadirektResourceIds.length === 0) {
-    return { date, slots: [] };
-  }
-
-  // Which weekday?
-  const jsDay = new Date(`${date}T12:00:00`).getDay(); // 0=Sun..6=Sat
-  const weekday = WEEKDAYS[(jsDay + 6) % 7]; // shift to Mon=0..Sun=6
-
-  // Fetch bookings + resource availability + our own paid bookings in parallel
-  const [allBookings, resources, ownBookings] = await Promise.all([
-    fetchBookingsForDate(date),
-    fetchResourceAvailability(date, date),
+  const [publicSlots, ownBookings, bdBookings] = await Promise.all([
+    fetchPublicSlots(publicServiceId, date).catch((err) => {
+      console.error(err);
+      return [] as PublicSlot[];
+    }),
     getActiveOwnBookingsForDate(date),
+    fetchBookingsForDate(date),
   ]);
 
-  // Filter own bookings to this family and pre-parse intervals
-  const ownFamilyIntervals: [number, number][] = ownBookings
-    .filter((b) => findFamilyForService(b.serviceId) === familyId)
-    .map((b) => {
-      const start = parseHm(b.time);
-      return [start, start + b.duration] as [number, number];
-    });
+  // Own bookings already in Bokadirekt are already gone from publicSlots
+  const pendingOwn = findUnsynced(
+    ownBookings
+      .filter((b) => findFamilyForService(b.serviceId) === familyId)
+      .map((b) => ({ ...b, date })),
+    bdBookings
+  ).map((b) => [parseHm(b.time), parseHm(b.time) + b.duration] as [number, number]);
 
-  // Group bookings by resource
-  const bookingsByResource = new Map<string, RawBooking[]>();
-  for (const b of allBookings) {
-    const arr = bookingsByResource.get(b.resourceId) ?? [];
-    arr.push(b);
-    bookingsByResource.set(b.resourceId, arr);
+  // Capacity per start time = number of staff/resources offering it
+  const byTime = new Map<string, { employees: Set<number>; duration: number }>();
+  for (const s of publicSlots) {
+    const time = s.start.slice(11, 16);
+    const entry = byTime.get(time) ?? { employees: new Set(), duration: s.duration };
+    entry.employees.add(s.employeeId);
+    byTime.set(time, entry);
   }
 
-  // Determine which capable resources actually have capacity on this date
-  // (bookableMinutes > 0 means not on vacation/sick/fully absent)
-  const capableWithCapacity = new Set<string>();
-  for (const r of resources) {
-    if (!family.bokadirektResourceIds.includes(r.resourceId)) continue;
-    if (!r.bookableOnline) continue;
-    const availability = r.availabilities?.find(
-      (a) => a.date.slice(0, 10) === date
-    );
-    if (availability && availability.bookableMinutes > 0) {
-      capableWithCapacity.add(r.resourceId);
-    }
-  }
-
-  const duration = service.duration;
-
-  // Per time slot: count Bokadirekt-free capable resources, subtract our own
-  // paid bookings overlapping that time. Slot available iff difference > 0.
-  const timeState = new Map<
-    string,
-    { withinHours: boolean; freeResources: number }
-  >();
-
-  for (const rid of family.bokadirektResourceIds) {
-    if (!capableWithCapacity.has(rid)) continue; // skip vacation/sick/closed
-
-    const res = typedMapping.resources[rid];
-    if (!res || !res.bookableOnline) continue;
-
-    const hours = res.hoursByWeekday[weekday];
-    if (!hours) continue;
-
-    const open = parseHm(hours.open);
-    const close = parseHm(hours.close);
-    if (close - open < duration) continue;
-
-    const busy = (bookingsByResource.get(rid) ?? []).map(bookingInterval);
-
-    for (
-      let start = open;
-      start + duration <= close;
-      start += SLOT_GRANULARITY_MIN
-    ) {
-      const key = fmtHm(start);
-      const state =
-        timeState.get(key) ?? { withinHours: false, freeResources: 0 };
-      state.withinHours = true;
-      const interval: [number, number] = [start, start + duration];
-      if (!busy.some((b) => overlaps(interval, b))) {
-        state.freeResources += 1;
-      }
-      timeState.set(key, state);
-    }
-  }
-
-  const sortedTimes = Array.from(timeState.keys()).sort();
-  const slots: TimeSlot[] = sortedTimes
-    .filter((t) => timeState.get(t)!.withinHours)
+  const slots: TimeSlot[] = Array.from(byTime.keys())
+    .sort()
     .map((time) => {
+      const { employees, duration } = byTime.get(time)!;
       const interval: [number, number] = [parseHm(time), parseHm(time) + duration];
-      const ownConflicts = ownFamilyIntervals.filter((b) =>
-        overlaps(interval, b)
-      ).length;
+      const conflicts = pendingOwn.filter((b) => overlaps(interval, b)).length;
       return {
         id: `slot-${date}-${time.replace(":", "")}`,
         time,
-        available: timeState.get(time)!.freeResources > ownConflicts,
+        available: employees.size > conflicts,
       };
     });
 
@@ -443,10 +398,12 @@ const SYNC_TOLERANCE_MIN = 15;
  * A paid booking counts as entered when Bokadirekt has a non-cancelled
  * booking on one of the family's resources starting within ±15 min.
  */
-export function findUnsynced(
-  paid: PaidBooking[],
+export function findUnsynced<
+  T extends Pick<PaidBooking, "serviceId" | "date" | "time">
+>(
+  paid: T[],
   bdBookings: Pick<RawBooking, "resourceId" | "startDate" | "cancelled">[]
-): PaidBooking[] {
+): T[] {
   return paid.filter((p) => {
     const familyId = findFamilyForService(p.serviceId);
     const resources = familyId
