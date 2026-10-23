@@ -339,9 +339,7 @@ export const TREATMENT_FAMILIES: TreatmentFamily[] = [
   {
     id: "ir-bastu",
     name: "IR Sauna",
-    // ponytail: generic FSA photo, swap for a real IR sauna image
-    image:
-      "https://images.squarespace-cdn.com/content/v1/66def6493457365fcadf9c12/e56f38ad-18d1-408c-b954-959cd1ee6c0b/fsa.jpg",
+    image: "/ir-bastu.jpg",
     description:
       "Infraröd bastu som värmer kroppen inifrån. 30 minuter för avslappning och återhämtning efter träning.",
     priceTiers: [
