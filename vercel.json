@@ -1,5 +1,5 @@
 {
   "crons": [
-    { "path": "/api/cron/bokadirekt-sync", "schedule": "0 6-20 * * *" }
+    { "path": "/api/cron/bokadirekt-sync", "schedule": "0 7 * * 1" }
   ]
 }

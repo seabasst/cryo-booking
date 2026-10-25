@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  // Cron runs 06-20 UTC to cover both CET and CEST; only act 08-21 Stockholm
+  // Cron runs Mondays 07 UTC (08 CET / 09 CEST); guard keeps manual hits to 08-21 Stockholm
   const hour = Number(
     new Date().toLocaleString("sv-SE", {
       timeZone: "Europe/Stockholm",
