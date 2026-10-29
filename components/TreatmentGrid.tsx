@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { TREATMENT_FAMILIES } from "@/lib/services";
+import { BOOKABLE_FAMILIES } from "@/lib/services";
 import type { TreatmentFamily } from "@/lib/types";
 
 interface TreatmentGridProps {
@@ -11,7 +11,7 @@ interface TreatmentGridProps {
 export default function TreatmentGrid({ onFamilySelect }: TreatmentGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-      {TREATMENT_FAMILIES.map((family) => (
+      {BOOKABLE_FAMILIES.map((family) => (
         <button
           key={family.id}
           onClick={() => onFamilySelect(family)}

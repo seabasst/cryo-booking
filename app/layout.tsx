@@ -14,12 +14,12 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Boka Behandling | FSA Workouts HQ",
   description:
-    "Boka din behandling online hos FSA Workouts HQ. Kryoterapi, massage, Insculpt och mer.",
+    "Boka massage online hos FSA Workouts HQ. Deep tissue, sportmassage och klassisk svensk massage.",
   keywords: [
     "FSA Workouts",
-    "kryoterapi",
     "massage",
-    "insculpt",
+    "sportmassage",
+    "deep tissue",
     "recovery",
     "träning",
     "boka",

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createCheckoutSession, hasCustomerAlreadyPurchased } from "@/lib/stripe";
-import { getServiceById } from "@/lib/services";
+import { getServiceById, isBookable } from "@/lib/services";
 import type { CreateCheckoutRequest } from "@/lib/types";
 
 const ONE_TIME_SERVICES = new Set(["kryoterapi-prova-pa"]);
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     // Never trust client-sent name/duration/price — take them from our catalog
     const lookup = getServiceById(body.serviceId);
-    if (!lookup) {
+    if (!lookup || !isBookable(body.serviceId)) {
       return NextResponse.json(
         { error: "Unknown service" },
         { status: 400 }

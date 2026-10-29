@@ -421,6 +421,16 @@ export const TREATMENT_FAMILIES: TreatmentFamily[] = [
   },
 ];
 
+// Only massage is bookable online. The full catalog stays so the Bokadirekt
+// sync check still recognises already-paid bookings for other treatments.
+export const BOOKABLE_FAMILIES = TREATMENT_FAMILIES.filter(
+  (f) => f.id === "massage"
+);
+
+export function isBookable(serviceId: string) {
+  return BOOKABLE_FAMILIES.some((f) => f.serviceIds.includes(serviceId));
+}
+
 export function getTreatmentFamilyById(familyId: string) {
   return TREATMENT_FAMILIES.find((f) => f.id === familyId);
 }
